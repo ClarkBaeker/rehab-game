@@ -1,17 +1,20 @@
 import asyncio
 import websockets
 import pygame
+import json
 
 esp_ip = "192.168.2.106"
+
+message = {"command": "turn_on", "led_id": 1}
 
 
 async def websocket_client():
     uri = "ws://" + esp_ip + ":81"
     async with websockets.connect(uri) as websocket:
-        await websocket.send("start_game")
+        await websocket.send(json.dumps(message))
         print("Game start command sent!")
-        response = await websocket.recv()
-        print(f"Received: {response}")
+        """ response = await websocket.recv()
+        print(f"Received: {response}") """
 
 
 # Initialize Pygame
