@@ -18,14 +18,13 @@ connected_clients = {}
 
 
 # WebSocket server logic
-async def handle_client(websocket, path):
+async def handle_client(websocket):
     client_id = await websocket.recv()  # First message is the identifier
     connected_clients[client_id] = websocket
     print(f"Client connected: {client_id}")
     try:
         async for message in websocket:
             print(f"Message from {client_id}: {message}")
-            # Process incoming messages from ESP32 if needed
     except websockets.ConnectionClosed:
         print(f"Client disconnected: {client_id}")
     finally:
@@ -118,10 +117,7 @@ class GameManager:
                 # Send command when a key is pressed
                 # Example: Send a message to a client when a key is pressed
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    if "BoardESP" in connected_clients.keys():
-                        asyncio.run(
-                            send_message(connected_clients["BoardESP"], "Turn on LED 1")
-                        )
+                    asyncio.run(send_message("BoardESP", "Turn on LED 1"))
                 ##################
                 # Pass events to the current screen
                 self.screens[self.current_screen_name].handle_event(event)
