@@ -3,8 +3,7 @@
 #include "wifi_credentials.h"
 #include <ArduinoJson.h>
 
-// WebSocket server address
-const char* WS_SERVER_IP = "10.101.38.10"; // Replace with your computers's local IP
+// WebSocket server address (ip address needs to be specified in wifi_credentials.h)
 const int WS_SERVER_PORT = 8765;
 
 // WebSocket client instance

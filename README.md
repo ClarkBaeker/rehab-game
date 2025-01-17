@@ -44,14 +44,13 @@ rehab-game
 When starting the game, the two ESPs need to be connected to the same local WIFI as the computer running the `/pygame-app`. To prepare them for that, follow these steps:
 1. Copy the two content of the template file for the wifi credentials that you find in the `/<esp_project>/include` folder of each ESP-project to a header file `/<esp_project>/include/wifi_credentials.h`.
 2. In these files enter the WIFI credentials of the WIFI that the computer running the `/pygame-app` is connected to.
+3. Additionally, you need to add the ip address of the computer running the `/pygame-app`.  
 
-The `wifi_credentials.h` file is part of `.gitignore` and thereby the credentials kept safe locally. 
+The `wifi_credentials.h` file is part of `.gitignore` and thereby the credentials kept safe locally.
 
-Next, upload the `esp32-firmware-board` firmware onto the ESP32 attached to the blackboard by running the **Upload and Monitor** option of PlatformIO. The ESP32 will connect to the WIFI **and** its IP address will be shown in the Serial Monitor. Remember this IP!
+Next, you can startup the `/pygame-app` by running `main.py`. This will also start the websocket server that the two ESPs attached to the blackboard and knee will connect to as clients.
 
-Before uploading the `esp32-firmware-knee` firmware onto the ESP32 attached to the knee of the patient, update the `esp_ip` variable ... Now upload the code to the ESP!
-
-Before starting the `/pygame-app`, update the `esp_ip` variable in `/pygame-app/main.py` with this IP. Now you can start the Pygame.
+Lastly, upload the `esp32-firmware-board` and `esp32-firmware-knee` firmware onto the ESP32 boards by running the **Upload and Monitor** option of PlatformIO.
 
 Everything is set up - Have fun!
 
