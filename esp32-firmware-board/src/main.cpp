@@ -2,10 +2,12 @@
 #include <WebSocketsServer.h>
 //#include <ESPmDNS.h>
 #include "wifi_credentials.h"
+#include <ArduinoJson.h>
 
 WebSocketsServer webSocket = WebSocketsServer(81);
 
-void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size_t length) {
+// This onWebSocketEvent() function only sends back a string to the client
+/* void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size_t length) {
   if (type == WStype_TEXT) {
     String message = String((char *)payload);
     if (message == "start_game") {
@@ -14,6 +16,34 @@ void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size
       webSocket.sendTXT(client_num, "ack_start_game");
     }
   }
+} */
+
+void handleWebSocketMessage(uint8_t *payload, size_t length) {
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, payload, length);
+
+    if (error) {
+        Serial.print("JSON Parsing failed: ");
+        Serial.println(error.c_str());
+        return;
+    }
+
+    const char* command = doc["command"];
+    int led_id = doc["led_id"];
+
+    if (strcmp(command, "turn_on") == 0) {
+        Serial.printf("Turning on LED %d\n", led_id);
+        // Implement your LED logic here
+        /* if (led_id == 1) {
+            digitalWrite(LED_BUILTIN, HIGH); // Example for built-in LED
+        } */
+    }
+}
+
+void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t *payload, size_t length) {
+    if (type == WStype_TEXT) {
+        handleWebSocketMessage(payload, length);
+    }
 }
 
 void setup() {
