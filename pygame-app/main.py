@@ -43,7 +43,7 @@ async def send_message(client_id, message):
     if client_id in connected_clients:
         websocket = connected_clients[client_id]
         try:
-            await websocket.send(message)
+            await websocket.send(json.dumps(message))
             print(f"Sent to {client_id}: {message}")
         except websockets.ConnectionClosed:
             print(f"Failed to send to {client_id}: Connection closed")
@@ -117,7 +117,8 @@ class GameManager:
                 # Send command when a key is pressed
                 # Example: Send a message to a client when a key is pressed
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    asyncio.run(send_message("BoardESP", "Turn on LED 1"))
+                    message = {"command": "turn_on", "led_id": 1}
+                    asyncio.run(send_message("BoardESP", message))
                 ##################
                 # Pass events to the current screen
                 self.screens[self.current_screen_name].handle_event(event)

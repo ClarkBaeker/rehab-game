@@ -10,6 +10,25 @@ const int WS_SERVER_PORT = 8765;
 WebSocketsClient webSocket;
 bool isWebSocketConnected = false; // Track connection status
 
+void handleWebSocketMessage(uint8_t *payload, size_t length) {
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, payload, length);
+    if (error) {
+        Serial.print("JSON Parsing failed: ");
+        Serial.println(error.c_str());
+        return;
+    }
+    const char* command = doc["command"];
+    int led_id = doc["led_id"];
+    if (strcmp(command, "turn_on") == 0) {
+        Serial.printf("Turning on LED %d\n", led_id);
+        // Implement your LED logic here
+        /* if (led_id == 1) {
+            digitalWrite(LED_BUILTIN, HIGH); // Example for built-in LED
+        } */
+    }
+}
+
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
   if (type == WStype_CONNECTED) {
         // Send unique identifier
@@ -18,11 +37,7 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
         isWebSocketConnected = true;
   }
   if (type == WStype_TEXT) {
-    String message = String((char *)payload);
-    // Trigger game logic on ESP32
-    if (message == "Turn on LED 1") {
-      Serial.println("Message received from server: " + message);
-    }
+    handleWebSocketMessage(payload, length);
   }
 } 
 
