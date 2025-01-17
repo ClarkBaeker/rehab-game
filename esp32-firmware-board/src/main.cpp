@@ -1,6 +1,7 @@
 #include <WiFi.h>
 #include <WebSocketsClient.h>
 #include "wifi_credentials.h"
+#include <ArduinoJson.h>
 
 // WebSocket server address
 const char* WS_SERVER_IP = "192.168.1.100"; // Replace with your computers's local IP
@@ -17,7 +18,7 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
       Serial.println("Message sent to client: " + message);
     }
   }
-}
+} 
 
 void setup() {
   Serial.begin(115200);

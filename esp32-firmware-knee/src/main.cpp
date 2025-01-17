@@ -1,6 +1,7 @@
 #include <WiFi.h>
 #include <WebSocketsServer.h>
 #include "wifi_credentials.h"
+#include <ArduinoJson.h>
 
 void setup() {
   Serial.begin(115200);
