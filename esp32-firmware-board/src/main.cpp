@@ -1,17 +1,20 @@
 #include <WiFi.h>
-#include <WebSocketsServer.h>
-//#include <ESPmDNS.h>
+#include <WebSocketsClient.h>
 #include "wifi_credentials.h"
 
-WebSocketsServer webSocket = WebSocketsServer(81);
+// WebSocket server address
+const char* WS_SERVER_IP = "192.168.1.100"; // Replace with your computers's local IP
+const int WS_SERVER_PORT = 8765;
 
-void onWebSocketEvent(uint8_t client_num, WStype_t type, uint8_t * payload, size_t length) {
+// WebSocket client instance
+WebSocketsClient webSocket;
+
+void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
   if (type == WStype_TEXT) {
     String message = String((char *)payload);
+    // Trigger game logic on ESP32
     if (message == "start_game") {
-      // Trigger game logic on ESP32
-      Serial.println("Game started!");
-      webSocket.sendTXT(client_num, "ack_start_game");
+      Serial.println("Message sent to client: " + message);
     }
   }
 }
@@ -25,20 +28,24 @@ void setup() {
   }
   Serial.println("Connected to WiFi");
 
-  // Can be used to dynmaically discover the ESP using a hostname. Slower than IP address!!
-  /* if (!MDNS.begin("esp32")) { // Hostname "esp32.local"
-      Serial.println("Error starting mDNS");
-  } else {
-      Serial.println("mDNS responder started");
-  } */
-
-  Serial.print("ESP32 IP Address: ");
-  Serial.println(WiFi.localIP()); // Print IP address
-  
-  webSocket.begin();
-  webSocket.onEvent(onWebSocketEvent);
+  // Connect to WebSocket server
+  webSocket.begin(WS_SERVER_IP, WS_SERVER_PORT, "/");
+  String message = "BoardESP";
+  webSocket.sendTXT(message.c_str());
+  webSocket.onEvent(webSocketEvent);
+  webSocket.setReconnectInterval(5000);
 }
 
 void loop() {
-  webSocket.loop();
+  // Maintain WebSocket connection
+    webSocket.loop();
+
+  // Send a message every 5 seconds
+  static unsigned long lastMessageTime = 0;
+  if (millis() - lastMessageTime > 5000) {
+      lastMessageTime = millis();
+      String message = "Hello from ESP32!";
+      webSocket.sendTXT(message.c_str());
+      Serial.println("Message sent to server: " + message);
+  }
 }
