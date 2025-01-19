@@ -42,7 +42,7 @@ rehab-game
 ## Setup
 
 When starting the game, the two ESPs need to be connected to the same local WIFI as the computer running the `/pygame-app`. To prepare them for that, follow these steps:
-1. Copy the two content of the template file for the wifi credentials that you find in the `/<esp_project>/include` folder of each ESP-project to a header file `/<esp_project>/include/wifi_credentials.h`.
+1. Copy the content of the template file for the wifi credentials that you find in the `/<esp_project>/include` folder of each ESP-project to a header file `/<esp_project>/include/wifi_credentials.h` for each project.
 2. In these files enter the WIFI credentials of the WIFI that the computer running the `/pygame-app` is connected to.
 3. Additionally, you need to add the ip address of the computer running the `/pygame-app`.  
 
