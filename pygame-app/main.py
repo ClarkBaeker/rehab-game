@@ -4,7 +4,7 @@ from screens.home_screen import HomeScreen
 from screens.explanation_screen import ExplanationScreen
 from screens.game_screen import GameScreen
 from screens.end_of_game_screen import EndOfGameScreen
-from screens.feeeback_screen import FeedbackScreen
+from screens.feedback_screen import FeedbackScreen
 from screens.repeat_screen import RepeatScreen
 
 import asyncio
@@ -68,7 +68,7 @@ REPEAT_SCREEN = "REPEAT_SCREEN"
 class GameManager:
     def __init__(self):
 
-        self.debug = True
+        self.debug = False
 
         pygame.init()
         self.screen_width = (
@@ -111,6 +111,7 @@ class GameManager:
             # Handle events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    self.screens[self.current_screen_name].on_exit()
                     pygame.quit()
                     sys.exit()
                 ##################
@@ -138,6 +139,7 @@ class GameManager:
     def switch_screen(self, screen_name):
         """Switch to a different screen."""
         self.current_screen_name = screen_name
+        self.screens[self.current_screen_name].on_enter()
 
 
 def main():
