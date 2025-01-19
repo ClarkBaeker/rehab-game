@@ -7,7 +7,7 @@ from utils.invisible_button import InvisibleButton
 
 class RepeatScreen(ScreenInterface):
     def __init__(self, manager):
-        self.manager = manager
+        super().__init__(manager)
         # Just one big 'repeat' arrow in the middle
         self.repeat_rect = pygame.Rect(
             (manager.screen_width // 2 - 50, manager.screen_height // 2 - 50),

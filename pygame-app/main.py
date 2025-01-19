@@ -138,6 +138,7 @@ class GameManager:
 
     def switch_screen(self, screen_name):
         """Switch to a different screen."""
+        self.screens[self.current_screen_name].on_exit()
         self.current_screen_name = screen_name
         self.screens[self.current_screen_name].on_enter()
 

@@ -8,7 +8,7 @@ import random
 
 class GameScreen(ScreenInterface):
     def __init__(self, manager):
-        self.manager = manager
+        super().__init__(manager)
 
         # Load the background with arrows
         self.background = pygame.image.load("images/game.png").convert()

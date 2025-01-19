@@ -8,7 +8,7 @@ from utils.logger import log_data
 
 class EndOfGameScreen(ScreenInterface):
     def __init__(self, manager):
-        self.manager = manager
+        super().__init__(manager)
 
         # Load the background with arrows
         self.background_5_min = pygame.image.load(

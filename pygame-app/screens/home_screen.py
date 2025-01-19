@@ -6,7 +6,7 @@ from screens.screen_interface import ScreenInterface
 
 class HomeScreen(ScreenInterface):
     def __init__(self, manager):
-        self.manager = manager
+        super().__init__(manager)
         self.background = load_image("images/start.png")
         # Invisible button area in the middle
 

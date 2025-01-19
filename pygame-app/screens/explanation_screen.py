@@ -6,7 +6,7 @@ from utils.invisible_button import InvisibleButton
 
 class ExplanationScreen(ScreenInterface):
     def __init__(self, manager):
-        self.manager = manager
+        super().__init__(manager)
 
         # Load the background with arrows
         self.background = pygame.image.load("images/explanation.png").convert()
