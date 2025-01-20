@@ -91,8 +91,9 @@ class GameScreen(ScreenInterface):
                 c["pos"][1] / 600 * (self.manager.screen_height - 200),
             )
 
-        # Keep track of which circle is currently highlighted
+        # Keep track of which circle is currently highlighted, activate one randomly
         self.active_circle_id = None
+        self.highlight_new_circle()
 
         # Generate invisible buttons
         self.forward_button = InvisibleButton(
@@ -109,6 +110,24 @@ class GameScreen(ScreenInterface):
         # Start time
         self.manager.shared_data["start_time"] = time.time()
         self.highlight_new_circle()
+
+        # Check input mode
+        self.input_mode = self.manager.shared_data.get("input_mode", "mouse")  # default to mouse
+        self.transform_matrix = self.manager.shared_data.get("transform_matrix", None)
+
+        if self.input_mode == "finger":
+            # Set up the camera and tracker
+            import cv2
+            self.cap = cv2.VideoCapture(0)
+            from utils.finger_tracking_mediapipe import FingerTracker # Import here to avoid loading it on mouse mode
+            self.finger_tracker = FingerTracker(
+                transform_matrix=self.transform_matrix,
+                screen_width=self.manager.screen_width,
+                screen_height=self.manager.screen_height
+            )
+        else:
+            self.cap = None
+            self.finger_tracker = None
 
     def go_back(self):
         self.manager.switch_screen("EXPLANATION_SCREEN")
@@ -133,31 +152,61 @@ class GameScreen(ScreenInterface):
         # Delegate events to the invisible buttons
         self.back_button.handle_event(event)
         self.forward_button.handle_event(event)
+        
+        if self.input_mode == "mouse":
+            # Check if user clicked on a circle
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                # Check if user clicked on active circle
+                mx, my = event.pos
+                for circle in self.circles:
+                    if circle["id"] == self.active_circle_id:
+                        cx, cy = circle["pos"]
+                        if (mx - cx) ** 2 + (my - cy) ** 2 <= circle["radius"] ** 2:
+                            # Correct circle pressed
+                            if self.positive_sound:
+                                self.positive_sound.play()
 
-        # Check if user clicked on a circle
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            # Check if user clicked on active circle
-            mx, my = event.pos
-            for circle in self.circles:
-                if circle["id"] == self.active_circle_id:
-                    cx, cy = circle["pos"]
-                    if (mx - cx) ** 2 + (my - cy) ** 2 <= circle["radius"] ** 2:
-                        # Correct circle pressed
-                        if self.positive_sound:
-                            self.positive_sound.play()
+                            # Increment dot counter
+                            self.manager.shared_data["dots_pressed"] += 1
 
-                        # Increment dot counter
-                        self.manager.shared_data["dots_pressed"] += 1
+                            # Log press event
+                            press_time = time.time()
+                            self.manager.shared_data["press_times"].append(
+                                (press_time, self.active_circle_id)
+                            )
 
-                        # Log press event
-                        press_time = time.time()
-                        self.manager.shared_data["press_times"].append(
-                            (press_time, self.active_circle_id)
-                        )
+                            # Turn back to original color & highlight new one
+                            self.highlight_new_circle()
 
-                        # Turn back to original color & highlight new one
-                        self.highlight_new_circle()
+        else: # Finger mode
+            # Get finger position
+            ret, frame = self.cap.read()
+            if not ret:
+                return
 
+            finger_pos = self.finger_tracker.get_finger_position(frame)
+            if finger_pos is not None:
+                fx, fy = finger_pos
+                for circle in self.circles:
+                    if circle["id"] == self.active_circle_id:
+                        cx, cy = circle["pos"]
+                        if (fx - cx) ** 2 + (fy - cy) ** 2 <= circle["radius"] ** 2:
+                            # Correct circle pressed
+                            if self.positive_sound:
+                                self.positive_sound.play()
+
+                            # Increment dot counter
+                            self.manager.shared_data["dots_pressed"] += 1
+
+                            # Log press event
+                            press_time = time.time()
+                            self.manager.shared_data["press_times"].append(
+                                (press_time, self.active_circle_id)
+                            )
+
+                            # Turn back to original color & highlight new one
+                            self.highlight_new_circle()
+            
         # Check game end conditions each click
         self.check_game_end_condition()
 
@@ -169,6 +218,7 @@ class GameScreen(ScreenInterface):
                 time.time() - self.manager.shared_data["start_time"]
             )
             self.manager.switch_screen("END_OF_GAME_SCREEN")
+            self.cleanup()
             return
 
         # 5 minutes have passed
@@ -179,14 +229,30 @@ class GameScreen(ScreenInterface):
                 time.time() - self.manager.shared_data["start_time"]
             )
             self.manager.switch_screen("END_OF_GAME_SCREEN")
+            self.cleanup()
 
     def update(self):
+        # If finger mode, grab frame and get finger coords
+        if self.input_mode == "finger" and self.cap is not None:
+            ret, frame = self.cap.read()
+            if ret:
+                pos = self.finger_tracker.get_finger_position(frame)
+                if pos:
+                    # interpret pos as a "mouse" location
+                    self.finger_x, self.finger_y = pos
+                            
         super().update()
+
 
     def draw(self, surface):
         super().draw(surface)
         # Draw the background
         surface.blit(self.background, (0, 0))
+
+        # If using finger coords, you can visualize a cursor
+        if self.input_mode == "finger":
+            # Draw a small circle or image at self.finger_x, self.finger_y
+            pygame.draw.circle(surface, (255, 0, 0), (int(self.finger_x), int(self.finger_y)), 10)
 
         # Draw counter, frozen if the game has ended
         elapsed_time = int(time.time() - self.manager.shared_data["start_time"])
@@ -222,4 +288,8 @@ class GameScreen(ScreenInterface):
             self.forward_button.draw_debug(surface)
 
     def on_exit(self):
+        # Called on screen exit if needed
+        if self.cap:
+            self.cap.release()
+            
         super().on_exit()
