@@ -177,3 +177,5 @@ X_*
 # log files, except for one example
 logs/*
 !logs/game_log_20250115-215718.json 
+
+.python-version
