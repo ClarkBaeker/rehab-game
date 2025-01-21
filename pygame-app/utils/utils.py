@@ -1,4 +1,8 @@
 import pygame
+from pathlib import Path
+
+# Path to the base directory of the project
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 def render_text(surface, text, font_size, color, position):
     font = pygame.font.SysFont(None, font_size)
@@ -14,8 +18,8 @@ def render_centered_test(surface, text, font_size, color, position):
     # Blit the text surface at the center of the screen
     surface.blit(text_surface, text_rect)
 
-def load_image(path):
-    return pygame.image.load(path)
+def load_image(image_file_name):
+    return pygame.image.load(BASE_DIR / "images" / image_file_name)
 
 def load_sound(path):
     try:

@@ -4,98 +4,45 @@ from screens.screen_interface import ScreenInterface
 from utils.utils import render_text, load_sound
 from utils.invisible_button import InvisibleButton
 import random
-
+import cv2
 
 class GameScreen(ScreenInterface):
     def __init__(self, manager):
         super().__init__(manager)
 
-        # Load the background with arrows
         self.background = pygame.image.load("images/game.png").convert()
 
-        # Define how often to press dots to "win" the game. Currently the screen is still hardcoded to 20 dots.
         self.how_often_to_press_dots = 20
         if self.manager.debug:
             self.how_often_to_press_dots = 3
 
-        # Define how the game maximal goes. Currently the screen is still hardcoded to 5 minutes.
-        self.how_long = 5 * 60  # 5 minutes
+        self.how_long = 5 * 60  # in seconds
         if self.manager.debug:
-            self.how_long = 10  # 10 seconds
+            self.how_long = 10
 
-        # Define circles (id, x, y, radius, color, highlighted_color)
         non_highlighted_color = (255, 255, 255)
         highlighted_color = (255, 0, 0)
 
         self.circles = [
-            {
-                "id": 0,
-                "pos": (100, 100),
-                "radius": 20,
-                "color": non_highlighted_color,
-                "highlight": highlighted_color,
-            },
-            {
-                "id": 1,
-                "pos": (200, 200),
-                "radius": 20,
-                "color": non_highlighted_color,
-                "highlight": highlighted_color,
-            },
-            {
-                "id": 2,
-                "pos": (300, 150),
-                "radius": 20,
-                "color": non_highlighted_color,
-                "highlight": highlighted_color,
-            },
-            {
-                "id": 3,
-                "pos": (400, 300),
-                "radius": 20,
-                "color": non_highlighted_color,
-                "highlight": highlighted_color,
-            },
-            {
-                "id": 4,
-                "pos": (500, 100),
-                "radius": 20,
-                "color": non_highlighted_color,
-                "highlight": highlighted_color,
-            },
-            {
-                "id": 5,
-                "pos": (600, 200),
-                "radius": 20,
-                "color": non_highlighted_color,
-                "highlight": highlighted_color,
-            },
-            {
-                "id": 6,
-                "pos": (300, 400),
-                "radius": 20,
-                "color": non_highlighted_color,
-                "highlight": highlighted_color,
-            },
-            {
-                "id": 7,
-                "pos": (700, 500),
-                "radius": 20,
-                "color": non_highlighted_color,
-                "highlight": highlighted_color,
-            },
+            {"id":0, "pos":(100,100), "radius":20, "color":non_highlighted_color, "highlight":highlighted_color},
+            {"id":1, "pos":(200,200), "radius":20, "color":non_highlighted_color, "highlight":highlighted_color},
+            {"id":2, "pos":(300,150), "radius":20, "color":non_highlighted_color, "highlight":highlighted_color},
+            {"id":3, "pos":(400,300), "radius":20, "color":non_highlighted_color, "highlight":highlighted_color},
+            {"id":4, "pos":(500,100), "radius":20, "color":non_highlighted_color, "highlight":highlighted_color},
+            {"id":5, "pos":(600,200), "radius":20, "color":non_highlighted_color, "highlight":highlighted_color},
+            {"id":6, "pos":(300,400), "radius":20, "color":non_highlighted_color, "highlight":highlighted_color},
+            {"id":7, "pos":(700,500), "radius":20, "color":non_highlighted_color, "highlight":highlighted_color},
         ]
+
         for c in self.circles:
             c["pos"] = (
                 c["pos"][0] / 800 * self.manager.screen_width,
                 c["pos"][1] / 600 * (self.manager.screen_height - 200),
             )
 
-        # Keep track of which circle is currently highlighted, activate one randomly
         self.active_circle_id = None
         self.highlight_new_circle()
 
-        # Generate invisible buttons
         self.forward_button = InvisibleButton(
             manager, default_button_type="forward", callback=self.go_forward
         )
@@ -103,31 +50,45 @@ class GameScreen(ScreenInterface):
             manager, default_button_type="back", callback=self.go_back
         )
 
-        # Sounds
         self.positive_sound = load_sound("sounds/positive_sound.mp3")
 
+        # Variables for finger tracking
+        self.cap = None
+        self.finger_tracker = None
+        self.finger_x = None
+        self.finger_y = None
+
     def on_enter(self):
-        # Start time
         self.manager.shared_data["start_time"] = time.time()
+        self.manager.shared_data["dots_pressed"] = 0
+        self.manager.shared_data["end_reason"] = None
+
         self.highlight_new_circle()
 
-        # Check input mode
-        self.input_mode = self.manager.shared_data.get("input_mode", "mouse")  # default to mouse
+        self.input_mode = self.manager.shared_data.get("input_mode", "mouse")
         self.transform_matrix = self.manager.shared_data.get("transform_matrix", None)
+        # Load the 4 calibration corner points if you stored them
+        self.calibration_points = self.manager.shared_data.get("calibration_points", [])
 
         if self.input_mode == "finger":
-            # Set up the camera and tracker
-            import cv2
+            print("is in finger mode")
+            from utils.finger_tracking_mediapipe import FingerTracker
             self.cap = cv2.VideoCapture(0)
-            from utils.finger_tracking_mediapipe import FingerTracker # Import here to avoid loading it on mouse mode
-            self.finger_tracker = FingerTracker(
-                transform_matrix=self.transform_matrix,
-                screen_width=self.manager.screen_width,
-                screen_height=self.manager.screen_height
-            )
-        else:
-            self.cap = None
-            self.finger_tracker = None
+            if not self.cap.isOpened():
+                print("Warning: Could not open webcam.")
+                self.cap = None
+            else:
+                print("Tracking finger...")
+                self.finger_tracker = FingerTracker(
+                    transform_matrix=self.transform_matrix,
+                    screen_width=self.manager.screen_width,
+                    screen_height=self.manager.screen_height,
+                    calibration_points=self.calibration_points
+                )
+                cv2.namedWindow("Finger Tracking Window", cv2.WINDOW_NORMAL)
+                cv2.resizeWindow("Finger Tracking Window", 640, 480)
+
+        super().on_enter()
 
     def go_back(self):
         self.manager.switch_screen("EXPLANATION_SCREEN")
@@ -140,123 +101,103 @@ class GameScreen(ScreenInterface):
         self.manager.switch_screen("END_OF_GAME_SCREEN")
 
     def highlight_new_circle(self):
-        # Choose a random circle other than the currently active one
-        possible_ids = [
-            c["id"] for c in self.circles if c["id"] != self.active_circle_id
-        ]
+        possible_ids = [c["id"] for c in self.circles if c["id"] != self.active_circle_id]
         if not possible_ids:
             return
         self.active_circle_id = random.choice(possible_ids)
 
     def handle_event(self, event):
-        # Delegate events to the invisible buttons
         self.back_button.handle_event(event)
         self.forward_button.handle_event(event)
-        
+
+        # Mouse-based circle collision
         if self.input_mode == "mouse":
-            # Check if user clicked on a circle
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                # Check if user clicked on active circle
                 mx, my = event.pos
-                for circle in self.circles:
-                    if circle["id"] == self.active_circle_id:
-                        cx, cy = circle["pos"]
-                        if (mx - cx) ** 2 + (my - cy) ** 2 <= circle["radius"] ** 2:
-                            # Correct circle pressed
-                            if self.positive_sound:
-                                self.positive_sound.play()
+                self.check_circle_collision(mx, my)
 
-                            # Increment dot counter
-                            self.manager.shared_data["dots_pressed"] += 1
-
-                            # Log press event
-                            press_time = time.time()
-                            self.manager.shared_data["press_times"].append(
-                                (press_time, self.active_circle_id)
-                            )
-
-                            # Turn back to original color & highlight new one
-                            self.highlight_new_circle()
-
-        else: # Finger mode
-            # Get finger position
-            ret, frame = self.cap.read()
-            if not ret:
-                return
-
-            finger_pos = self.finger_tracker.get_finger_position(frame)
-            if finger_pos is not None:
-                fx, fy = finger_pos
-                for circle in self.circles:
-                    if circle["id"] == self.active_circle_id:
-                        cx, cy = circle["pos"]
-                        if (fx - cx) ** 2 + (fy - cy) ** 2 <= circle["radius"] ** 2:
-                            # Correct circle pressed
-                            if self.positive_sound:
-                                self.positive_sound.play()
-
-                            # Increment dot counter
-                            self.manager.shared_data["dots_pressed"] += 1
-
-                            # Log press event
-                            press_time = time.time()
-                            self.manager.shared_data["press_times"].append(
-                                (press_time, self.active_circle_id)
-                            )
-
-                            # Turn back to original color & highlight new one
-                            self.highlight_new_circle()
-            
-        # Check game end conditions each click
         self.check_game_end_condition()
 
+    def check_circle_collision(self, x, y):
+        for circle in self.circles:
+            if circle["id"] == self.active_circle_id:
+                cx, cy = circle["pos"]
+                if (x - cx) ** 2 + (y - cy) ** 2 <= circle["radius"] ** 2:
+                    if self.positive_sound:
+                        self.positive_sound.play()
+
+                    self.manager.shared_data["dots_pressed"] += 1
+                    press_time = time.time()
+                    self.manager.shared_data.setdefault("press_times", [])
+                    self.manager.shared_data["press_times"].append(
+                        (press_time, self.active_circle_id)
+                    )
+                    self.highlight_new_circle()
+
+    def update(self):
+        super().update()
+
+        if self.input_mode == "finger" and self.cap is not None:
+            ret, frame = self.cap.read()
+            if ret and self.finger_tracker:
+                # Get the mapped finger coords + camera coords
+                finger_data = self.finger_tracker.get_finger_position(frame)
+                if finger_data:
+                    mapped_x, mapped_y, cam_x, cam_y = finger_data
+                    self.finger_x, self.finger_y = mapped_x, mapped_y
+                    # Check collision with the active circle (in game coords)
+                    self.check_circle_collision(self.finger_x, self.finger_y)
+                    self.check_game_end_condition() # TODO
+
+                    # Draw the calibration rectangle if there are calibration points
+                    if len(self.calibration_points) == 4:
+                        for i in range(4):
+                            pt1 = self.calibration_points[i]
+                            pt2 = self.calibration_points[(i+1) % 4]
+                            cv2.line(frame, pt1, pt2, (255, 255, 0), 2)
+
+                    # Draw the finger position in camera coords
+                    cv2.circle(frame, (cam_x, cam_y), 10, (0, 0, 255), -1)
+                
+
+                    # Show the result in a separate window
+                    cv2.imshow("Finger Tracking Window", frame)
+                    cv2.waitKey(10)
+                    # print("Showing frame now...")
+
     def check_game_end_condition(self):
-        # Dots reached 20 (or similar value)
         if self.manager.shared_data["dots_pressed"] >= self.how_often_to_press_dots:
             self.manager.shared_data["end_reason"] = "20_reached"
             self.manager.shared_data["duration"] = int(
                 time.time() - self.manager.shared_data["start_time"]
             )
             self.manager.switch_screen("END_OF_GAME_SCREEN")
-            self.cleanup()
+            # self.cleanup()
+            self.on_exit()
             return
 
-        # 5 minutes have passed
         elapsed_time = time.time() - self.manager.shared_data["start_time"]
-        if elapsed_time > self.how_long:  # 300 seconds
+        if elapsed_time > self.how_long:
             self.manager.shared_data["end_reason"] = "timeout"
             self.manager.shared_data["duration"] = int(
                 time.time() - self.manager.shared_data["start_time"]
             )
             self.manager.switch_screen("END_OF_GAME_SCREEN")
-            self.cleanup()
-
-    def update(self):
-        # If finger mode, grab frame and get finger coords
-        if self.input_mode == "finger" and self.cap is not None:
-            ret, frame = self.cap.read()
-            if ret:
-                pos = self.finger_tracker.get_finger_position(frame)
-                if pos:
-                    # interpret pos as a "mouse" location
-                    self.finger_x, self.finger_y = pos
-                            
-        super().update()
+            # self.cleanup()
+            self.on_exit()
 
 
     def draw(self, surface):
         super().draw(surface)
-        # Draw the background
         surface.blit(self.background, (0, 0))
-
-        # If using finger coords, you can visualize a cursor
-        if self.input_mode == "finger":
-            # Draw a small circle or image at self.finger_x, self.finger_y
+        
+        # If finger mode, draw a red "cursor" on the game screen
+        if self.input_mode == "finger" and self.finger_x is not None and self.finger_y is not None:
             pygame.draw.circle(surface, (255, 0, 0), (int(self.finger_x), int(self.finger_y)), 10)
 
-        # Draw counter, frozen if the game has ended
-        elapsed_time = int(time.time() - self.manager.shared_data["start_time"])
+        # Timer or final dots
         if not self.manager.shared_data.get("end_reason"):
+            elapsed_time = int(time.time() - self.manager.shared_data["start_time"])
             render_text(
                 surface,
                 f"Dots: {self.manager.shared_data['dots_pressed']} - Time: {elapsed_time}s",
@@ -276,20 +217,17 @@ class GameScreen(ScreenInterface):
         # Draw circles
         for circle in self.circles:
             color = (
-                circle["highlight"]
-                if circle["id"] == self.active_circle_id
-                else circle["color"]
+                circle["highlight"] if circle["id"] == self.active_circle_id else circle["color"]
             )
             pygame.draw.circle(surface, color, circle["pos"], circle["radius"])
 
-        # Debug: Draw debug rectangles to verify button placement
+        # Debug
         if self.manager.debug:
             self.back_button.draw_debug(surface)
             self.forward_button.draw_debug(surface)
 
     def on_exit(self):
-        # Called on screen exit if needed
-        if self.cap:
+        if self.cap is not None:
             self.cap.release()
-            
+            cv2.destroyWindow("Finger Tracking Window")
         super().on_exit()

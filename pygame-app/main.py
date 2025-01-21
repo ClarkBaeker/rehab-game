@@ -1,11 +1,15 @@
 import pygame
 import sys
+import os
+from pathlib import Path
+
 from screens.home_screen import HomeScreen
 from screens.explanation_screen import ExplanationScreen
 from screens.game_screen import GameScreen
 from screens.end_of_game_screen import EndOfGameScreen
 from screens.feedback_screen import FeedbackScreen
 from screens.repeat_screen import RepeatScreen
+from screens.configuration_screen import ConfigurationScreen
 
 import asyncio
 import websockets
@@ -63,12 +67,13 @@ GAME_SCREEN = "GAME_SCREEN"
 END_OF_GAME_SCREEN = "END_OF_GAME_SCREEN"
 FEEDBACK_SCREEN = "FEEDBACK_SCREEN"
 REPEAT_SCREEN = "REPEAT_SCREEN"
+CONFIGURATION_SCREEN = "CONFIGURATION_SCREEN"
 
 
 class GameManager:
     def __init__(self):
 
-        self.debug = False
+        self.debug = False # TODO
 
         pygame.init()
         self.screen_width = (
@@ -104,6 +109,7 @@ class GameManager:
             END_OF_GAME_SCREEN: EndOfGameScreen(self),
             FEEDBACK_SCREEN: FeedbackScreen(self),
             REPEAT_SCREEN: RepeatScreen(self),
+            CONFIGURATION_SCREEN: ConfigurationScreen(self),
         }
 
     def run(self):
