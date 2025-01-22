@@ -2,7 +2,15 @@ import pygame
 import pygame_gui
 import cv2
 import numpy as np
+from games.connect_dots import TouchDots
 from screens.screen_interface import ScreenInterface
+
+
+game_mode_mapping = {
+    "Touch the Dots": TouchDots,
+    "Other Game": None,
+}
+
 
 class ConfigurationScreen(ScreenInterface):
     def __init__(self, manager):
@@ -13,21 +21,23 @@ class ConfigurationScreen(ScreenInterface):
         self.background.fill((200, 200, 200))
 
         # UI manager for managing GUI elements
-        self.ui_manager = pygame_gui.UIManager((manager.screen_width, manager.screen_height))
+        self.ui_manager = pygame_gui.UIManager(
+            (manager.screen_width, manager.screen_height)
+        )
 
         # Title text
         self.title_label = pygame_gui.elements.UITextBox(
             relative_rect=pygame.Rect(50, 50, manager.screen_width - 100, 100),
             html_text="<b>Configuration</b>: Click 'Start Calibration' to define the 4 corners.<br>"
-                        "Then choose whether to use Mouse or Finger input in the Game Screen.",
-            manager=self.ui_manager
+            "Then choose whether to use Mouse or Finger input in the Game Screen.",
+            manager=self.ui_manager,
         )
 
         # Button to start corner calibration
         self.calibration_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect(50, 200, 180, 40),
             text="Start Calibration",
-            manager=self.ui_manager
+            manager=self.ui_manager,
         )
 
         # Dropdown to select input mode
@@ -35,16 +45,26 @@ class ConfigurationScreen(ScreenInterface):
             options_list=["mouse", "finger"],
             starting_option="finger",  # default
             relative_rect=pygame.Rect(50, 260, 180, 30),
-            manager=self.ui_manager
+            manager=self.ui_manager,
+        )
+
+        # Dropdown to select game mode
+        self.game_mode_dropdown = pygame_gui.elements.UIDropDownMenu(
+            options_list=["Touch the Dots", "Other Game"],
+            starting_option="Touch the Dots",  # default
+            relative_rect=pygame.Rect(50, 320, 180, 30),
+            manager=self.ui_manager,
         )
 
         # Invisible back button area (instead of a pygame_gui button)
         # self.back_button_rect = pygame.Rect(50, manager.screen_height - 60, 100, 40)
-        # Confirmation button 
+        # Confirmation button
         self.back_button_rect = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect(manager.screen_height - 300, manager.screen_height - 100, 200, 50),
+            relative_rect=pygame.Rect(
+                manager.screen_height - 300, manager.screen_height - 100, 200, 50
+            ),
             text="Confirm",
-            manager=self.ui_manager
+            manager=self.ui_manager,
         )
 
     def on_enter(self):
@@ -66,8 +86,19 @@ class ConfigurationScreen(ScreenInterface):
                 self.calibrate_corners()
             if event.ui_element == self.back_button_rect:
                 # Save the chosen input mode
-                self.manager.shared_data["input_mode"] = self.input_mode_dropdown.selected_option[0]
+                self.manager.shared_data["input_mode"] = (
+                    self.input_mode_dropdown.selected_option[0]
+                )
                 print(self.manager.shared_data["input_mode"])
+                # Save the chosen game
+                self.manager.shared_data["game_mode"] = (
+                    self.game_mode_dropdown.selected_option[0]
+                )
+                print(self.manager.shared_data["game_mode"])
+                selected_game_class = game_mode_mapping.get(
+                    self.game_mode_dropdown.selected_option[0], TouchDots
+                )
+                self.manager.game = selected_game_class(self.manager)
                 self.manager.switch_screen("HOME_SCREEN")
 
     def update(self):
@@ -117,8 +148,15 @@ class ConfigurationScreen(ScreenInterface):
             # Display clicks so far
             for i, (cx, cy) in enumerate(clicked_points):
                 cv2.circle(frame, (cx, cy), 5, (0, 0, 255), -1)
-                cv2.putText(frame, str(i + 1), (cx + 5, cy - 5),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2)
+                cv2.putText(
+                    frame,
+                    str(i + 1),
+                    (cx + 5, cy - 5),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.8,
+                    (255, 0, 0),
+                    2,
+                )
 
             cv2.imshow("Calibration", frame)
             key = cv2.waitKey(1)
@@ -135,19 +173,19 @@ class ConfigurationScreen(ScreenInterface):
             return
 
         src_pts = np.float32(clicked_points)
-        dst_pts = np.float32([
-            [0, 0],
-            [self.manager.screen_width, 0],
-            [self.manager.screen_width, self.manager.screen_height],
-            [0, self.manager.screen_height]
-        ])
+        dst_pts = np.float32(
+            [
+                [0, 0],
+                [self.manager.screen_width, 0],
+                [self.manager.screen_width, self.manager.screen_height],
+                [0, self.manager.screen_height],
+            ]
+        )
 
         M = cv2.getPerspectiveTransform(src_pts, dst_pts)
         self.manager.shared_data["transform_matrix"] = M
         self.manager.shared_data["calibration_points"] = clicked_points
         print("Calibration completed successfully.")
-
-
 
 
 # import pygame
@@ -166,11 +204,11 @@ class ConfigurationScreen(ScreenInterface):
 #             - "input_mode": "mouse" or "finger"
 #         """
 #         # super().__init__(manager)
-        
+
 #         # self.background = pygame.image.load(
 #         #     "images/start.png"
 #         # ).convert()
-                
+
 #         self.ui_manager = pygame_gui.UIManager((manager.screen_width, manager.screen_height))
 
 #         # Background or instructions label
@@ -205,7 +243,7 @@ class ConfigurationScreen(ScreenInterface):
 
 #     def on_enter(self):
 #         super().on_enter()
-        
+
 #     def handle_event(self, event, time_delta=1):
 #         self.ui_manager.process_events(event)
 

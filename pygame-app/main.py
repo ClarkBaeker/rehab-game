@@ -3,6 +3,8 @@ import sys
 import os
 from pathlib import Path
 
+from games.connect_dots import TouchDots
+from games.game_interface import GameInterface
 from screens.home_screen import HomeScreen
 from screens.explanation_screen import ExplanationScreen
 from screens.game_screen import GameScreen
@@ -73,7 +75,7 @@ CONFIGURATION_SCREEN = "CONFIGURATION_SCREEN"
 class GameManager:
     def __init__(self):
 
-        self.debug = False # TODO
+        self.debug = False  # TODO
 
         pygame.init()
         self.screen_width = (
@@ -89,10 +91,10 @@ class GameManager:
 
         # Store data needed across screens
         self.shared_data = {
-            "dots_pressed": 0,
+            "game_mode": None,
+            "level": None,
             "start_time": None,
-            "press_times": [],  # will store (time_stamp, circle_id)
-            "end_reason": None,  # "20_reached", "timeout", or "early_abort"
+            "end_reason": None,  # "win", "timeout", or "early_abort"
             "duration": None,  # duration of last game
             "feedback": None,
         }
@@ -111,6 +113,9 @@ class GameManager:
             REPEAT_SCREEN: RepeatScreen(self),
             CONFIGURATION_SCREEN: ConfigurationScreen(self),
         }
+
+        # Game dependent variables
+        self.game: GameInterface = TouchDots(self)
 
     def run(self):
         while True:
