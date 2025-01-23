@@ -14,96 +14,101 @@ class TouchDots(GameInterface):
     def __init__(self, manager, level=None):
         super().__init__(manager, level)
         self.level = level
+        
+        # Dots are drawn in percent from the center of the screen
+        dist_x = 12 # horizontal distance between dots, in percent. Assumption: Non-even number
+        dist_y = 12 # vertical distance between dots, in percent. Assumption: Even number 
         self.dots = [
             {
                 "id": 0,
-                "pos": (75, 35),
+                "pos": (-dist_x, -3/2*dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 1,
-                "pos": (200, 35),
+                "pos": (0,  -3/2*dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 2,
-                "pos": (325, 35),
+                "pos": (+dist_x, -3/2*dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 3,
-                "pos": (75, 145),
+                "pos": (-dist_x, -1/2*dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 4,
-                "pos": (200, 145),
+                "pos": (0, -1/2*dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 5,
-                "pos": (325, 145),
+                "pos": (+dist_x, -1/2*dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 6,
-                "pos": (75, 255),
+                "pos": (-dist_x, +1/2*dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 7,
-                "pos": (200, 255),
+                "pos": (0, +1/2*dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 8,
-                "pos": (325, 255),
+                "pos": (+dist_x, +1/2*dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 9,
-                "pos": (75, 365),
+                "pos": (-dist_x, +3/2*dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 10,
-                "pos": (200, 365),
+                "pos": (0, +3/2*dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 11,
-                "pos": (325, 365),
+                "pos": (+dist_x, +3/2*dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
         ]
+
         for c in self.dots:
             c["pos"] = (
-                c["pos"][0] / 800 * self.manager.screen_width,
-                c["pos"][1] / 600 * (self.manager.screen_height - 200),
+                c["pos"][0] / 100 * self.manager.screen_width + self.manager.screen_width/2,
+                c["pos"][1] / 100 * (self.manager.screen_height) + self.manager.screen_height/2,
             )
         self.active_dot_id: int = None
         self.game_ended = False
