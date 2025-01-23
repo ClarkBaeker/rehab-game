@@ -86,12 +86,12 @@ void loop() {
   // Maintain WebSocket connection
   webSocket.loop();
 
-  // Send a message every 5 seconds
+  /* // Send a message every 5 seconds
   static unsigned long lastMessageTime = 0;
   if (isWebSocketConnected && millis() - lastMessageTime > 5000) {
       lastMessageTime = millis();
       String message = "Hello from ESP32!";
       webSocket.sendTXT(message.c_str());
       Serial.println("Message sent to server: " + message);
-  }
+  } */
 }
