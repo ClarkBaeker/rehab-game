@@ -125,7 +125,6 @@ class GameScreen(ScreenInterface):
     def on_exit(self):
         super().on_exit()
         if self.cap is not None:
-            print("hi")
             for i in range(1, 5):
                 cv2.destroyAllWindows()
                 cv2.waitKey(1)

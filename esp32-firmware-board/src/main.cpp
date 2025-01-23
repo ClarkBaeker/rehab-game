@@ -3,6 +3,8 @@
 #include "wifi_credentials.h"
 #include <ArduinoJson.h>
 
+const int LED = 17; // GPIO pin for LED
+
 // WebSocket server address (ip address needs to be specified in wifi_credentials.h)
 const int WS_SERVER_PORT = 8765;
 
@@ -22,6 +24,7 @@ void handleWebSocketMessage(uint8_t *payload, size_t length) {
     int led_id = doc["led_id"];
     if (strcmp(command, "turn_on") == 0) {
         Serial.printf("Turning on LED %d\n", led_id);
+        digitalWrite(LED, HIGH);
         // Implement your LED logic here
         /* if (led_id == 1) {
             digitalWrite(LED_BUILTIN, HIGH); // Example for built-in LED
@@ -49,6 +52,8 @@ void setup() {
     Serial.println("Connecting to WiFi...");
   }
   Serial.println("Connected to WiFi");
+
+  pinMode(LED, OUTPUT);
 
   // Connect to WebSocket server
   webSocket.begin(WS_SERVER_IP, WS_SERVER_PORT, "/");

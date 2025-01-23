@@ -14,91 +14,94 @@ class TouchDots(GameInterface):
     def __init__(self, manager, level=None):
         super().__init__(manager, level)
         self.level = level
-        
+
         # Dots are drawn in percent from the center of the screen
-        dist_x = 12 # horizontal distance between dots, in percent. Assumption: Non-even number
-        dist_y = 12 # vertical distance between dots, in percent. Assumption: Even number 
+        dist_x = 12  # horizontal distance between dots, in percent. Assumption: Non-even number
+        dist_y = (
+            12  # vertical distance between dots, in percent. Assumption: Even number
+        )
+
         self.dots = [
             {
                 "id": 0,
-                "pos": (-dist_x, -3/2*dist_y),
+                "pos": (-dist_x, -3 / 2 * dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 1,
-                "pos": (0,  -3/2*dist_y),
+                "pos": (0, -3 / 2 * dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 2,
-                "pos": (+dist_x, -3/2*dist_y),
+                "pos": (+dist_x, -3 / 2 * dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 3,
-                "pos": (-dist_x, -1/2*dist_y),
+                "pos": (-dist_x, -1 / 2 * dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 4,
-                "pos": (0, -1/2*dist_y),
+                "pos": (0, -1 / 2 * dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 5,
-                "pos": (+dist_x, -1/2*dist_y),
+                "pos": (+dist_x, -1 / 2 * dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 6,
-                "pos": (-dist_x, +1/2*dist_y),
+                "pos": (-dist_x, +1 / 2 * dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 7,
-                "pos": (0, +1/2*dist_y),
+                "pos": (0, +1 / 2 * dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 8,
-                "pos": (+dist_x, +1/2*dist_y),
+                "pos": (+dist_x, +1 / 2 * dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 9,
-                "pos": (-dist_x, +3/2*dist_y),
+                "pos": (-dist_x, +3 / 2 * dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 10,
-                "pos": (0, +3/2*dist_y),
+                "pos": (0, +3 / 2 * dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
             },
             {
                 "id": 11,
-                "pos": (+dist_x, +3/2*dist_y),
+                "pos": (+dist_x, +3 / 2 * dist_y),
                 "radius": 20,
                 "color": NON_HIGHLIGHTED_COLOR,
                 "highlight": HIGHLIGHTED_COLOR,
@@ -107,11 +110,12 @@ class TouchDots(GameInterface):
 
         for c in self.dots:
             c["pos"] = (
-                c["pos"][0] / 100 * self.manager.screen_width + self.manager.screen_width/2,
-                c["pos"][1] / 100 * (self.manager.screen_height) + self.manager.screen_height/2,
+                c["pos"][0] / 100 * self.manager.screen_width
+                + self.manager.screen_width / 2,
+                c["pos"][1] / 100 * (self.manager.screen_height)
+                + self.manager.screen_height / 2,
             )
         self.active_dot_id: int = None
-        self.game_ended = False
         self.how_often_to_press_dots = 5
         self.maximum_duration = 5 * 60  # in seconds
         if self.level == 2:
@@ -172,7 +176,6 @@ class TouchDots(GameInterface):
 
     def end_game(self):
         super().end_game()
-        self.game_ended = True
 
     def _highlight_new_dot(self):
         possible_ids = [c["id"] for c in self.dots if c["id"] != self.active_dot_id]
