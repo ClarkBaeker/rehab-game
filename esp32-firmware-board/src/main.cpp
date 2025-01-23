@@ -2,8 +2,26 @@
 #include <WebSocketsClient.h>
 #include "wifi_credentials.h"
 #include <ArduinoJson.h>
+#include <map>
 
-const int LED = 17; // GPIO pin for LED
+
+std::map<int, int> led_map = {
+    {0, 32},
+    {1, 26},
+    {2, 25},
+    {3, 33},
+    {4, 27},
+    {5, 14},
+    {6, 12},
+    {7, 13},
+    {8, 15},
+    {9, 2},
+    {10, 0},
+    {11, 4},
+    {12, 16},
+    {13, 17},
+};
+
 
 // WebSocket server address (ip address needs to be specified in wifi_credentials.h)
 const int WS_SERVER_PORT = 8765;
@@ -24,11 +42,11 @@ void handleWebSocketMessage(uint8_t *payload, size_t length) {
     int led_id = doc["led_id"];
     if (strcmp(command, "turn_on") == 0) {
         Serial.printf("Turning on LED %d\n", led_id);
-        digitalWrite(LED, HIGH);
-        // Implement your LED logic here
-        /* if (led_id == 1) {
-            digitalWrite(LED_BUILTIN, HIGH); // Example for built-in LED
-        } */
+        digitalWrite(led_map[led_id], HIGH);
+    }
+    if (strcmp(command, "turn_off") == 0) {
+        Serial.printf("Turning off LED %d\n", led_id);
+        digitalWrite(led_map[led_id], LOW);
     }
 }
 
@@ -53,7 +71,10 @@ void setup() {
   }
   Serial.println("Connected to WiFi");
 
-  pinMode(LED, OUTPUT);
+  std::map<int, int>::iterator it;
+  for (it = led_map.begin(); it != led_map.end(); it++) {
+    pinMode(it->second, OUTPUT);
+  }
 
   // Connect to WebSocket server
   webSocket.begin(WS_SERVER_IP, WS_SERVER_PORT, "/");

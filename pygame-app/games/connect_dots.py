@@ -176,12 +176,24 @@ class TouchDots(GameInterface):
 
     def end_game(self):
         super().end_game()
+        self.manager.send_message(
+            "BoardESP",
+            {"command": "turn_off", "led_id": self.active_dot_id},
+        )
 
     def _highlight_new_dot(self):
-        possible_ids = [c["id"] for c in self.dots if c["id"] != self.active_dot_id]
+        possible_ids = [
+            c["id"]
+            for c in self.dots
+            if c["id"] != self.active_dot_id
+            # and c["id"] in [0, 1]  # change this back after all leds are connected
+        ]
         if not possible_ids:
             return
         self.active_dot_id = random.choice(possible_ids)
+        self.manager.send_message(
+            "BoardESP", {"command": "turn_on", "led_id": self.active_dot_id}
+        )
 
     def _check_dot_collision(self, x, y):
         for dot in self.dots:
@@ -197,6 +209,11 @@ class TouchDots(GameInterface):
                     self.manager.shared_data["press_times"].append(
                         (press_time, self.active_dot_id)
                     )
+                    self.manager.send_message(
+                        "BoardESP",
+                        {"command": "turn_off", "led_id": self.active_dot_id},
+                    )
+                    self._check_game_end_condition()
                     self._highlight_new_dot()
 
     def _check_game_end_condition(self):
