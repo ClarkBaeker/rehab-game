@@ -11,9 +11,10 @@ HIGHLIGHTED_COLOR = (255, 0, 0)
 
 class TouchDots(GameInterface):
 
-    def __init__(self, manager, level=None):
+    def __init__(self, manager, level = None):
         super().__init__(manager, level)
-        self.level = level
+        self.level = self.manager.shared_data["level"]
+        print(self.level)
 
         # Dots are drawn in percent from the center of the screen
         dist_x = 12  # horizontal distance between dots, in percent. Assumption: Non-even number
@@ -118,9 +119,24 @@ class TouchDots(GameInterface):
         self.active_dot_id: int = None
         self.how_often_to_press_dots = 5
         self.maximum_duration = 5 * 60  # in seconds
-        if self.level == 2:
-            self.how_often_to_press_dots = 30
+        if self.level == "Level 2":
+            self.how_often_to_press_dots = 3
             self.maximum_duration = 3 * 60
+            self.order = [9, 8,  5, 0]
+            self.index = 0
+
+        if self.level == "Level 1":
+            self.how_often_to_press_dots = 2
+            self.maximum_duration = 3 * 60
+            self.order = [9, 10, 11]
+            self.index = 0
+
+        if self.level == "Level 3":
+            self.how_often_to_press_dots = 3
+            self.maximum_duration = 3 * 60
+            self.order = [9, 7, 5, 2]
+            self.index = 0
+
         self.positive_sound = load_sound("sounds/positive_sound.mp3")
 
     def start(self):
@@ -130,7 +146,8 @@ class TouchDots(GameInterface):
         )
         self.manager.shared_data["press_times"] = []  # will store (time_stamp, dot_id)
         self.active_dot_id = None
-        self._highlight_new_dot()
+        #self._highlight_new_dot()
+        self.next()
 
     def handle_event(self, event):
         super().handle_event(event)
@@ -183,6 +200,16 @@ class TouchDots(GameInterface):
             return
         self.active_dot_id = random.choice(possible_ids)
 
+    def next(self):
+        if self.index >= len(self.order):
+            return
+        current = self.order[self.index]
+        self.index += 1
+        if current != self.active_dot_id:
+            self.active_dot_id = current
+        else:
+            return
+
     def _check_dot_collision(self, x, y):
         for dot in self.dots:
             if dot["id"] == self.active_dot_id:
@@ -197,7 +224,8 @@ class TouchDots(GameInterface):
                     self.manager.shared_data["press_times"].append(
                         (press_time, self.active_dot_id)
                     )
-                    self._highlight_new_dot()
+                    #self._highlight_new_dot()
+                    self.next()
 
     def _check_game_end_condition(self):
         if self.manager.shared_data["dots_pressed"] >= self.how_often_to_press_dots:

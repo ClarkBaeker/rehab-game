@@ -11,11 +11,11 @@ game_mode_mapping = {
     "Circle the Dots": TouchDots,
 }
 
-level_mapping = {
-    "Level 1": None,
-    "Level 2": None,
-    "level 3": None
-}
+# level_mapping = {
+#     "Level 1": None,
+#     "Level 2": None,
+#     "level 3": None
+# }
 
 
 class ConfigurationScreen(ScreenInterface):
@@ -113,9 +113,10 @@ class ConfigurationScreen(ScreenInterface):
                     self.game_mode_dropdown.selected_option[0], TouchDots
                 )
 
-                selected_level = level_mapping.get(
+                self.manager.shared_data["level"] = (
                     self.level_dropdown.selected_option[0]
                 )
+
                 # safe selected level
                 #self.manager.level = selected_level(self.manager)
 
