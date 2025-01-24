@@ -22,6 +22,25 @@ const int WS_SERVER_PORT = 8765;
 WebSocketsClient webSocket;
 bool isWebSocketConnected = false; // Track connection status
 
+void handleWebSocketMessage(uint8_t *payload, size_t length) {
+    JsonDocument doc;
+    DeserializationError error = deserializeJson(doc, payload, length);
+    if (error) {
+        Serial.print("JSON Parsing failed: ");
+        Serial.println(error.c_str());
+        return;
+    }
+    const char* command = doc["command"];
+    if (strcmp(command, "turn_on") == 0) {
+        Serial.printf("Turning on motors");
+        is_motor_on = true;
+    }
+    if (strcmp(command, "turn_off") == 0) {
+        Serial.printf("Turning off motors");
+        is_motor_on = false;
+    }
+}
+
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
   if (type == WStype_CONNECTED) {
         // Send unique identifier
@@ -30,18 +49,9 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
         isWebSocketConnected = true;
   }
   if (type == WStype_TEXT) {
-    String message = String((char *)payload);
-    // Trigger game logic on ESP32
-    if (message == "Turn on Vibromotors") {
-      Serial.println("Message received from server: " + message);
-      is_motor_on = true;
-    }
-    if (message == "Turn off Vibromotors") {
-      Serial.println("Message received from server: " + message);
-      is_motor_on = false;
-    }
+    handleWebSocketMessage(payload, length);
   }
-} 
+}
 
 void setup() {
   Serial.begin(115200);
@@ -51,14 +61,13 @@ void setup() {
     Serial.println("Connecting to WiFi...");
   }
   Serial.println("Connected to WiFi");
-
+  Serial.println("1");
   Wire.begin();
-
-  Serial.begin(115200);
-  while(!Serial) {}
-
+  Serial.println("2");
   imu1.init();
   imu2.init();
+
+  Serial.println("IMU initialized");
 
   imu1.setAccRange(ICM20948_ACC_RANGE_2G);
   imu2.setAccRange(ICM20948_ACC_RANGE_2G);
@@ -95,6 +104,7 @@ void setup() {
 
   drv.begin();
   // drv.setMode(DRV2605_MODE_REALTIME); // continuous drive
+  Serial.println("Motors initialized");
 
   drv.selectLibrary(1);
   drv.setMode(DRV2605_MODE_INTTRIG); 
@@ -140,7 +150,7 @@ void loop() {
   double angle2 = acos(gvals2.x / norm2);
 
   double angle = (angle1 + angle2) * 57.29578; // in degrees
-  Serial.print(angle); Serial.print("\n");
+  // Serial.print(angle); Serial.print("\n");
 
   if (is_motor_on) {
     if (angle > 20) {

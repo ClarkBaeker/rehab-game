@@ -130,6 +130,10 @@ class TouchDots(GameInterface):
         )
         self.manager.shared_data["press_times"] = []  # will store (time_stamp, dot_id)
         self.active_dot_id = None
+        self.manager.send_message(
+            "KneeESP",
+            {"command": "turn_on"},
+        )
         self._highlight_new_dot()
 
     def handle_event(self, event):
@@ -179,6 +183,10 @@ class TouchDots(GameInterface):
         self.manager.send_message(
             "BoardESP",
             {"command": "turn_off", "led_id": self.active_dot_id},
+        )
+        self.manager.send_message(
+            "KneeESP",
+            {"command": "turn_off"},
         )
 
     def _highlight_new_dot(self):
