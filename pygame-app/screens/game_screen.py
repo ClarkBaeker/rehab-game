@@ -6,7 +6,6 @@ import cv2
 
 WINDOW_NAME = "Finger Tracking Window"
 
-
 class GameScreen(ScreenInterface):
     def __init__(self, manager):
         super().__init__(manager)
@@ -31,6 +30,7 @@ class GameScreen(ScreenInterface):
         self.manager.shared_data["end_reason"] = None
 
         self.manager.game.start()
+        self.manager.logger.start_new_game()
 
         self.input_mode = self.manager.shared_data.get("input_mode", "mouse")
         self.transform_matrix = self.manager.shared_data.get("transform_matrix", None)
@@ -105,15 +105,19 @@ class GameScreen(ScreenInterface):
         super().draw(surface)
         surface.blit(self.background, (0, 0))
 
-        # If finger mode, draw a red "cursor" on the game screen
+        # If finger mode, draw a red "cursor" on the game screen and record the finger position
         if (
             self.input_mode == "finger"
             and self.finger_x is not None
             and self.finger_y is not None
         ):
+            # Draw the finger position on the game screen
             pygame.draw.circle(
                 surface, (255, 0, 0), (int(self.finger_x), int(self.finger_y)), 10
             )
+            
+            # Append data to the trajectory logger
+            self.manager.logger.append_finger_data(self.finger_x, self.finger_y)
 
         self.manager.game.draw(surface)
 

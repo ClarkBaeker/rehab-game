@@ -3,7 +3,7 @@ import time
 from screens.screen_interface import ScreenInterface
 from utils.utils import render_text, render_centered_test, load_sound
 from utils.invisible_button import InvisibleButton
-from utils.logger import log_data
+# from utils.logger import log_data
 
 
 class FeedbackScreen(ScreenInterface):
@@ -80,8 +80,8 @@ class FeedbackScreen(ScreenInterface):
         super().on_enter()
 
     def go_forward(self):
-        # Log data here
-        log_data(self.manager.shared_data)
+        # Log data
+        self.manager.logger.log_shared_data(self.manager.shared_data)
 
         # Debug: Print feedback
         if self.manager.debug:

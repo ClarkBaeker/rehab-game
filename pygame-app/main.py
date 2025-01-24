@@ -19,6 +19,8 @@ import pygame
 import json
 import threading
 
+from utils.logger import Logger
+
 # Dictionary to store connected clients
 connected_clients = {}
 
@@ -113,6 +115,9 @@ class GameManager:
             REPEAT_SCREEN: RepeatScreen(self),
             CONFIGURATION_SCREEN: ConfigurationScreen(self),
         }
+        
+        # Initialize logger
+        self.logger = Logger()
 
         # Game dependent variables
         self.game: GameInterface = TouchDots(self)
