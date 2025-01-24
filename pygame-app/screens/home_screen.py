@@ -5,6 +5,7 @@ from screens.screen_interface import ScreenInterface
 class HomeScreen(ScreenInterface):
     def __init__(self, manager):
         super().__init__(manager)
+
         self.background = pygame.image.load(
             "images/start.png"
         ).convert()
@@ -38,7 +39,10 @@ class HomeScreen(ScreenInterface):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # left click
                 if self.start_button_rect.collidepoint(event.pos):
-                    self.manager.switch_screen("EXPLANATION_SCREEN")
+                    if self.manager.shared_data["game_mode"] == "Connect the Dots":
+                        self.manager.switch_screen("EXPLANATION_SCREEN_CONNECTDOTS")
+                    elif self.manager.shared_data["game_mode"] == "Circle the Dots":
+                        self.manager.switch_screen("EXPLANATION_SCREEN_CIRCLEDOTS")
                 if self.config_button_rect.collidepoint(event.pos):
                     self.manager.switch_screen("CONFIGURATION_SCREEN")
 

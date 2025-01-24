@@ -12,6 +12,8 @@ from screens.end_of_game_screen import EndOfGameScreen
 from screens.feedback_screen import FeedbackScreen
 from screens.repeat_screen import RepeatScreen
 from screens.configuration_screen import ConfigurationScreen
+from screens.explanation_screen_connectDots import ExplanationConnectDots
+from screens.explanation_screen_circleDots import ExplanationCircleDots
 
 import asyncio
 import websockets
@@ -70,6 +72,8 @@ END_OF_GAME_SCREEN = "END_OF_GAME_SCREEN"
 FEEDBACK_SCREEN = "FEEDBACK_SCREEN"
 REPEAT_SCREEN = "REPEAT_SCREEN"
 CONFIGURATION_SCREEN = "CONFIGURATION_SCREEN"
+EXPLANATION_SCREEN_CONNECTDOTS = "EXPLANATION_SCREEN_CONNECTDOTS"
+EXPLANATION_SCREEN_CIRCLEDOTS = "EXPLANATION_SCREEN_CIRCLEDOTS"
 
 
 class GameManager:
@@ -112,6 +116,8 @@ class GameManager:
             FEEDBACK_SCREEN: FeedbackScreen(self),
             REPEAT_SCREEN: RepeatScreen(self),
             CONFIGURATION_SCREEN: ConfigurationScreen(self),
+            EXPLANATION_SCREEN_CONNECTDOTS: ExplanationConnectDots(self),
+            EXPLANATION_SCREEN_CIRCLEDOTS: ExplanationCircleDots(self),
         }
 
         # Game dependent variables

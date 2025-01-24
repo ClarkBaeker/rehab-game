@@ -7,8 +7,14 @@ from screens.screen_interface import ScreenInterface
 
 
 game_mode_mapping = {
-    "Touch the Dots": TouchDots,
-    "Other Game": None,
+    "Connect the Dots": TouchDots,
+    "Circle the Dots": TouchDots,
+}
+
+level_mapping = {
+    "Level 1": None,
+    "Level 2": None,
+    "level 3": None
 }
 
 
@@ -50,11 +56,19 @@ class ConfigurationScreen(ScreenInterface):
 
         # Dropdown to select game mode
         self.game_mode_dropdown = pygame_gui.elements.UIDropDownMenu(
-            options_list=["Touch the Dots", "Other Game"],
-            starting_option="Touch the Dots",  # default
+            options_list=["Connect the Dots", "Circle the Dots"],
+            starting_option="Connect the Dots",  # default
             relative_rect=pygame.Rect(50, 320, 180, 30),
             manager=self.ui_manager,
         )
+
+        self.level_dropdown = pygame_gui.elements.UIDropDownMenu(
+            options_list=["Level 1", "Level 2", "Level 3"],
+            starting_option="Level 1", #default
+            relative_rect=pygame.Rect(50, 380, 180, 30),
+            manager=self.ui_manager,
+        )
+
 
         # Invisible back button area (instead of a pygame_gui button)
         # self.back_button_rect = pygame.Rect(50, manager.screen_height - 60, 100, 40)
@@ -98,6 +112,13 @@ class ConfigurationScreen(ScreenInterface):
                 selected_game_class = game_mode_mapping.get(
                     self.game_mode_dropdown.selected_option[0], TouchDots
                 )
+
+                selected_level = level_mapping.get(
+                    self.level_dropdown.selected_option[0]
+                )
+                # safe selected level
+                #self.manager.level = selected_level(self.manager)
+
                 self.manager.game = selected_game_class(self.manager)
                 self.manager.switch_screen("HOME_SCREEN")
 
