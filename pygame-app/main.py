@@ -73,6 +73,10 @@ FEEDBACK_SCREEN = "FEEDBACK_SCREEN"
 REPEAT_SCREEN = "REPEAT_SCREEN"
 CONFIGURATION_SCREEN = "CONFIGURATION_SCREEN"
 
+# ESP clients
+BOARD_CLIENT = "BoardESP"
+KNEE_CLIENT = "KneeESP"
+
 
 class GameManager:
     def __init__(self):
@@ -119,6 +123,8 @@ class GameManager:
         # Initialize logger
         self.logger = Logger()
 
+        self.clients = [BOARD_CLIENT, KNEE_CLIENT]
+
         # Game dependent variables
         self.game: GameInterface = TouchDots(self)
 
@@ -157,6 +163,12 @@ class GameManager:
         self.screens[self.current_screen_name].on_exit()
         self.current_screen_name = screen_name
         self.screens[self.current_screen_name].on_enter()
+
+    def send_message(self, client_id, message):
+        if client_id not in self.clients:
+            print(f"Client {client_id} not found")
+            return
+        asyncio.run(send_message(client_id, message))
 
 
 def main():

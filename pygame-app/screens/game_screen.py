@@ -57,9 +57,11 @@ class GameScreen(ScreenInterface):
             cv2.resizeWindow(WINDOW_NAME, 640, 480)
 
     def go_back(self):
+        self.manager.game.end_game()
         self.manager.switch_screen("EXPLANATION_SCREEN")
 
     def go_forward(self):
+        self.manager.game.end_game()
         self.manager.shared_data["end_reason"] = "early_abort"
         self.manager.shared_data["duration"] = int(
             time.time() - self.manager.shared_data["start_time"]
@@ -129,7 +131,6 @@ class GameScreen(ScreenInterface):
     def on_exit(self):
         super().on_exit()
         if self.cap is not None:
-            print("hi")
             for i in range(1, 5):
                 cv2.destroyAllWindows()
                 cv2.waitKey(1)

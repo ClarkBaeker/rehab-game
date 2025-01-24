@@ -4,13 +4,11 @@ import time
 class GameInterface:
     def __init__(self, manager, level=None):
         self.manager = manager
-        self.level = None
+        self.level = level
+        self.game_ended = False
 
     def start(self):
         self.manager.shared_data["start_time"] = time.time()
-
-    def get_description(self):
-        pass
 
     def handle_event(self, event):
         pass
@@ -22,4 +20,4 @@ class GameInterface:
         pass
 
     def end_game(self):
-        pass
+        self.game_ended = True
