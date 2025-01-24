@@ -6,20 +6,20 @@
 
 
 std::map<int, int> led_map = {
-    {0, 32},
-    {1, 26},
-    {2, 25},
-    {3, 33},
-    {4, 27},
-    {5, 14},
-    {6, 12},
-    {7, 13},
-    {8, 15},
-    {9, 2},
-    {10, 0},
-    {11, 4},
-    {12, 16},
-    {13, 17},
+    {0, 34},
+    {1, 25},
+    {2, 26},
+    {3, 4},
+    {4, 36},
+    {5, 39},
+    {6, 32},
+    {7, 15},
+    {8, 33},
+    {9, 27},
+    {10, 12},
+    {11, 13},
+    // {12, x},
+    // {13, x},
 };
 
 
@@ -86,12 +86,12 @@ void loop() {
   // Maintain WebSocket connection
   webSocket.loop();
 
-  // Send a message every 5 seconds
+  /* // Send a message every 5 seconds
   static unsigned long lastMessageTime = 0;
   if (isWebSocketConnected && millis() - lastMessageTime > 5000) {
       lastMessageTime = millis();
       String message = "Hello from ESP32!";
       webSocket.sendTXT(message.c_str());
       Serial.println("Message sent to server: " + message);
-  }
+  } */
 }
