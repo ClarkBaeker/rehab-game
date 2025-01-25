@@ -24,8 +24,7 @@ class GameScreen(ScreenInterface):
         self.finger_tracker = None
         self.finger_x = None
         self.finger_y = None
-        
-                
+
         # Possibility to rescale the finger position to the game screen
         self.rescale_to_game_screen = True  
         self.game_screen_width = self.manager.screen_width * 1/2
@@ -40,6 +39,13 @@ class GameScreen(ScreenInterface):
         self.manager.shared_data["end_reason"] = None
 
         self.manager.game.start()
+        # Get height and width of gamescreen 
+        self.game_screen_width = self.manager.game.game_screen_width
+        self.game_screen_height = self.manager.game.game_screen_height
+        # Upper left corner of the game screen
+        self.x_offset = (self.manager.screen_width - self.game_screen_width) / 2
+        self.y_offset = self.manager.screen_height - self.game_screen_height + self.border_width # push the game screen down, such that lower boundary is not visible 
+
         self.manager.logger.start_new_game()
 
         self.input_mode = self.manager.shared_data.get("input_mode", "mouse")
@@ -120,11 +126,9 @@ class GameScreen(ScreenInterface):
                     cv2.waitKey(10)
                     if self.manager.game.game_ended:
                         self.manager.switch_screen("END_OF_GAME_SCREEN")
-                    # print("Showing frame now...")
                 
                 else: 
                     # Remove the "freezing" of the cv window, if no finger is present in the frame  
-                    
                     # Draw the calibration rectangle if there are calibration points
                     if len(self.calibration_points) == 4:
                         for i in range(4):
@@ -136,7 +140,6 @@ class GameScreen(ScreenInterface):
                     cv2.waitKey(10)
                     if self.manager.game.game_ended:
                         self.manager.switch_screen("END_OF_GAME_SCREEN")  
-
 
     def draw(self, surface):
         super().draw(surface)
