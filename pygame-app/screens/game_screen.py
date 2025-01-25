@@ -24,6 +24,16 @@ class GameScreen(ScreenInterface):
         self.finger_tracker = None
         self.finger_x = None
         self.finger_y = None
+        
+                
+        # Possibility to rescale the finger position to the game screen
+        self.rescale_to_game_screen = True  
+        self.game_screen_width = self.manager.screen_width * 1/2
+        self.game_screen_height = self.manager.screen_height * 5/6
+        self.border_width = 8 
+        # Upper left corner of the game screen
+        self.x_offset = (self.manager.screen_width - self.game_screen_width) / 2
+        self.y_offset = self.manager.screen_height - self.game_screen_height + self.border_width # push the game screen down, such that lower boundary is not visible 
 
     def on_enter(self):
         super().on_enter()
@@ -78,11 +88,20 @@ class GameScreen(ScreenInterface):
 
         if self.input_mode == "finger" and self.cap is not None:
             ret, frame = self.cap.read()
+            
             if ret and self.finger_tracker:
                 # Get the mapped finger coords + camera coords
                 finger_data = self.finger_tracker.get_finger_position(frame)
                 if finger_data:
                     mapped_x, mapped_y, cam_x, cam_y = finger_data
+                    
+                    # Add logic to rescale the finger position to the game screen, if wanted 
+                    if self.rescale_to_game_screen:
+                        # Game screen should touch the lower edge of the window, and be centered 
+                        mapped_x = mapped_x / self.manager.screen_width * self.game_screen_width + self.x_offset
+                        mapped_y = mapped_y / self.manager.screen_height * self.game_screen_width + self.y_offset
+
+                    # Update the game with the finger position 
                     self.finger_x, self.finger_y = mapped_x, mapped_y
                     self.manager.game.update(self.finger_x, self.finger_y)
 
@@ -102,10 +121,38 @@ class GameScreen(ScreenInterface):
                     if self.manager.game.game_ended:
                         self.manager.switch_screen("END_OF_GAME_SCREEN")
                     # print("Showing frame now...")
+                
+                else: 
+                    # Remove the "freezing" of the cv window, if no finger is present in the frame  
+                    
+                    # Draw the calibration rectangle if there are calibration points
+                    if len(self.calibration_points) == 4:
+                        for i in range(4):
+                            pt1 = self.calibration_points[i]
+                            pt2 = self.calibration_points[(i + 1) % 4]
+                            cv2.line(frame, pt1, pt2, (255, 255, 0), 2)
+
+                    cv2.imshow(WINDOW_NAME, frame)
+                    cv2.waitKey(10)
+                    if self.manager.game.game_ended:
+                        self.manager.switch_screen("END_OF_GAME_SCREEN")  
+
 
     def draw(self, surface):
         super().draw(surface)
         surface.blit(self.background, (0, 0))
+        self.manager.game.draw(surface)
+        
+        # Draw a brown rectangle around the game screen
+        if self.rescale_to_game_screen:
+            brown_color = (139, 69, 19)
+            pygame.draw.rect(
+                surface, 
+                brown_color, 
+                (self.x_offset, self.y_offset, self.game_screen_width, self.game_screen_height), 
+                width=self.border_width 
+                )  
+            # print("Drawing brown rectangle...")
 
         # If finger mode, draw a red "cursor" on the game screen and record the finger position
         if (
@@ -121,7 +168,6 @@ class GameScreen(ScreenInterface):
             # Append data to the trajectory logger
             self.manager.logger.append_finger_data(self.finger_x, self.finger_y)
 
-        self.manager.game.draw(surface)
 
         # Debug
         if self.manager.debug:
@@ -129,6 +175,7 @@ class GameScreen(ScreenInterface):
             self.forward_button.draw_debug(surface)
 
     def on_exit(self):
+        # self.current_game.end_game()
         super().on_exit()
         if self.cap is not None:
             for i in range(1, 5):

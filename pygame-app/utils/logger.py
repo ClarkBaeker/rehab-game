@@ -27,7 +27,7 @@ class Logger:
         self.game_log_filename = self.folder_name / f"game_log_{current_time}.json"
 
         # create a CSV file to log the trajectory
-        self.trajectory_filename = self.folder_name / f"trajectory_{current_time}.json"
+        self.trajectory_filename = self.folder_name / f"trajectory_{current_time}.csv"
         with open(self.trajectory_filename, mode="a", newline="") as file:
             writer = csv.writer(file)
 
