@@ -149,8 +149,8 @@ class GameScreen(ScreenInterface):
         with finger positions, and displays an OpenCV window.
         """
         if not self.finger_tracker:
-            return  # If FingerTracker isn't set, do nothing
-
+            # If FingerTracker is not set, do nothing
+            return  
         finger_data = self.finger_tracker.get_finger_position(frame)
         if finger_data:
             mapped_x, mapped_y, cam_x, cam_y = finger_data
