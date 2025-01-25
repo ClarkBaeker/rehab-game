@@ -101,7 +101,7 @@ class GameManager:
             "level": None,
             "start_time": None,
             "end_reason": None,  # "win", "timeout", or "early_abort"
-            "duration": None,  # duration of last game
+            "duration": None,  # duration of game
             "feedback": None,
         }
 

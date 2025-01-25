@@ -6,6 +6,7 @@ class GameInterface:
         self.manager = manager
         self.level = level
         self.game_ended = False
+        self.rescale_to_game_screen = False
 
     def start(self):
         self.manager.shared_data["start_time"] = time.time()
