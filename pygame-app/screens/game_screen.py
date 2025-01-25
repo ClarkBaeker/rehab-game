@@ -123,7 +123,7 @@ class GameScreen(ScreenInterface):
 
                     # Show the result in a separate window
                     cv2.imshow(WINDOW_NAME, frame)
-                    cv2.waitKey(10)
+                    cv2.waitKey(1)
                     if self.manager.game.game_ended:
                         self.manager.switch_screen("END_OF_GAME_SCREEN")
                 
@@ -137,7 +137,7 @@ class GameScreen(ScreenInterface):
                             cv2.line(frame, pt1, pt2, (255, 255, 0), 2)
 
                     cv2.imshow(WINDOW_NAME, frame)
-                    cv2.waitKey(10)
+                    cv2.waitKey(1)
                     if self.manager.game.game_ended:
                         self.manager.switch_screen("END_OF_GAME_SCREEN")  
 
