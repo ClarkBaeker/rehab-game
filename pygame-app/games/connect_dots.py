@@ -15,6 +15,10 @@ class TouchDots(GameInterface):
         super().__init__(manager, level)
         self.level = level
 
+        # Define the size of the game screen 
+        self.game_screen_width = self.manager.screen_width * 1/2
+        self.game_screen_height = self.manager.screen_height * 5/6
+        
         # Dots are drawn in percent from the center of the screen
         dist_x = 12  # horizontal distance between dots, in percent. Assumption: Non-even number
         dist_y = (
