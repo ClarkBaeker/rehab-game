@@ -6,12 +6,12 @@
 
 
 std::map<int, int> led_map = {
-    {0, 34},
+    {0, 19},
     {1, 25},
     {2, 26},
     {3, 4},
-    {4, 36},
-    {5, 39},
+    {4, 5},
+    {5, 18},
     {6, 27},
     {7, 12},
     {8, 13},
@@ -31,23 +31,28 @@ WebSocketsClient webSocket;
 bool isWebSocketConnected = false; // Track connection status
 
 void handleWebSocketMessage(uint8_t *payload, size_t length) {
-    JsonDocument doc;
-    DeserializationError error = deserializeJson(doc, payload, length);
-    if (error) {
-        Serial.print("JSON Parsing failed: ");
-        Serial.println(error.c_str());
-        return;
-    }
-    const char* command = doc["command"];
-    int led_id = doc["led_id"];
-    if (strcmp(command, "turn_on") == 0) {
-        Serial.printf("Turning on LED %d\n", led_id);
-        digitalWrite(led_map[led_id], HIGH);
-    }
-    if (strcmp(command, "turn_off") == 0) {
-        Serial.printf("Turning off LED %d\n", led_id);
-        digitalWrite(led_map[led_id], LOW);
-    }
+  // Parse JSON message
+  JsonDocument doc;
+  DeserializationError error = deserializeJson(doc, payload, length);
+  if (error) {
+      Serial.print("JSON Parsing failed: ");
+      Serial.println(error.c_str());
+      return;
+  }
+  
+  // Deconstruct JSON message
+  const char* command = doc["command"];
+  int led_id = doc["led_id"];
+
+  // Handle command
+  if (strcmp(command, "turn_on") == 0) {
+      Serial.printf("Turning on LED %d\n", led_id);
+      digitalWrite(led_map[led_id], HIGH);
+  }
+  if (strcmp(command, "turn_off") == 0) {
+      Serial.printf("Turning off LED %d\n", led_id);
+      digitalWrite(led_map[led_id], LOW);
+  }
 }
 
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
@@ -71,9 +76,17 @@ void setup() {
   }
   Serial.println("Connected to WiFi");
 
+  // Set up LED pins
   std::map<int, int>::iterator it;
   for (it = led_map.begin(); it != led_map.end(); it++) {
+    Serial.print("Setting pin ");
+    Serial.println(it->second);
     pinMode(it->second, OUTPUT);
+  }
+
+  // Turn off all LEDs
+  for (it = led_map.begin(); it != led_map.end(); it++) {
+    digitalWrite(it->second, LOW);
   }
 
   // Connect to WebSocket server
