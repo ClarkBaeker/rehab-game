@@ -176,6 +176,7 @@ class GameScreen(ScreenInterface):
             # Update the game logic with these coordinates
             self.finger_x, self.finger_y = mapped_x, mapped_y
             self.manager.game.update(self.finger_x, self.finger_y)
+            self.manager.logger.append_position_data(self.finger_x, self.finger_y)
 
             # Draw a red circle in the camera feed where the finger is
             cv2.circle(frame, (cam_x, cam_y), 10, (0, 0, 255), -1)
@@ -238,7 +239,6 @@ class GameScreen(ScreenInterface):
             pygame.draw.circle(
                 surface, (255, 0, 0), (int(self.finger_x), int(self.finger_y)), 10
             )
-            self.manager.logger.append_finger_data(self.finger_x, self.finger_y)
 
         # Debug outlines for buttons
         if self.manager.debug:
