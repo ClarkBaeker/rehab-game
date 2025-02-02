@@ -7,6 +7,7 @@ from utils.invisible_button import InvisibleButton
 
 WINDOW_NAME = "Finger Tracking Window"
 
+
 class GameScreen(ScreenInterface):
     def __init__(self, manager):
         super().__init__(manager)
@@ -44,13 +45,13 @@ class GameScreen(ScreenInterface):
         - Sets up finger tracking if needed
         """
         super().on_enter()
-        
-        # Reset shared_data, such that the game can be restarted 
+
+        # Reset shared_data, such that the game can be restarted
         self.manager.game.game_ended = False
         self.manager.shared_data["start_time"] = None
         self.manager.shared_data["end_reason"] = None
         self.manager.shared_data["feedback"] = None
-        
+
         # Log a new game
         self.manager.logger.start_new_game()
 
@@ -64,7 +65,7 @@ class GameScreen(ScreenInterface):
         self.input_mode = self.manager.shared_data.get("input_mode", "mouse")
         self.transform_matrix = self.manager.shared_data.get("transform_matrix")
         self.calibration_points = self.manager.shared_data.get("calibration_points", [])
-        
+
         if self.input_mode == "finger":
             self.initialize_finger_tracking()
 
@@ -74,12 +75,18 @@ class GameScreen(ScreenInterface):
         whatever the active game (`manager.game`) is using.
         """
         # In case the game object sets these attributes:
-        self.game_screen_width = getattr(self.manager.game, 'game_screen_width', self.manager.screen_width / 2)
-        self.game_screen_height = getattr(self.manager.game, 'game_screen_height', self.manager.screen_height * 5/6)
+        self.game_screen_width = getattr(
+            self.manager.game, "game_screen_width", self.manager.screen_width / 2
+        )
+        self.game_screen_height = getattr(
+            self.manager.game, "game_screen_height", self.manager.screen_height * 5 / 6
+        )
 
         self.x_offset = (self.manager.screen_width - self.game_screen_width) / 2
         # Push the game screen down so lower boundary isn’t visible
-        self.y_offset = self.manager.screen_height - self.game_screen_height + self.border_width
+        self.y_offset = (
+            self.manager.screen_height - self.game_screen_height + self.border_width
+        )
 
     def initialize_finger_tracking(self):
         """
@@ -109,6 +116,10 @@ class GameScreen(ScreenInterface):
         Ends the game and switches to explanation screen.
         """
         self.manager.game.end_game()
+        self.manager.shared_data["end_reason"] = "early_abort"
+        self.manager.shared_data["duration"] = int(
+            time.time() - self.manager.shared_data["start_time"]
+        )
         self.manager.switch_screen("EXPLANATION_SCREEN")
 
     def go_forward(self):
@@ -150,7 +161,7 @@ class GameScreen(ScreenInterface):
         """
         if not self.finger_tracker:
             # If FingerTracker is not set, do nothing
-            return  
+            return
         finger_data = self.finger_tracker.get_finger_position(frame)
         if finger_data:
             mapped_x, mapped_y, cam_x, cam_y = finger_data
@@ -164,7 +175,7 @@ class GameScreen(ScreenInterface):
 
             # Draw a red circle in the camera feed where the finger is
             cv2.circle(frame, (cam_x, cam_y), 10, (0, 0, 255), -1)
-            
+
         # Even if there's no finger, frame and vido will still be shown
         self.draw_calibration_rectangle(frame)
         cv2.imshow(WINDOW_NAME, frame)
@@ -200,18 +211,33 @@ class GameScreen(ScreenInterface):
         self.manager.game.draw(surface)
 
         # Brown rectangle border around the game screen
-        if self.rescale_to_game_screen and self.game_screen_width and self.game_screen_height:
+        if (
+            self.rescale_to_game_screen
+            and self.game_screen_width
+            and self.game_screen_height
+        ):
             brown_color = (139, 69, 19)
             pygame.draw.rect(
                 surface,
                 brown_color,
-                (self.x_offset, self.y_offset, self.game_screen_width, self.game_screen_height),
-                width=self.border_width
+                (
+                    self.x_offset,
+                    self.y_offset,
+                    self.game_screen_width,
+                    self.game_screen_height,
+                ),
+                width=self.border_width,
             )
 
         # Draw finger position if in finger mode
-        if self.input_mode == "finger" and self.finger_x is not None and self.finger_y is not None:
-            pygame.draw.circle(surface, (255, 0, 0), (int(self.finger_x), int(self.finger_y)), 10)
+        if (
+            self.input_mode == "finger"
+            and self.finger_x is not None
+            and self.finger_y is not None
+        ):
+            pygame.draw.circle(
+                surface, (255, 0, 0), (int(self.finger_x), int(self.finger_y)), 10
+            )
             self.manager.logger.append_finger_data(self.finger_x, self.finger_y)
 
         # Debug outlines for buttons
@@ -233,7 +259,9 @@ class GameScreen(ScreenInterface):
         """
         if not self.game_screen_height:
             return y
-        return (y / self.manager.screen_height) * self.game_screen_height + self.y_offset
+        return (
+            y / self.manager.screen_height
+        ) * self.game_screen_height + self.y_offset
 
     def on_exit(self):
         """
@@ -243,5 +271,5 @@ class GameScreen(ScreenInterface):
         super().on_exit()
         if self.cap is not None:
             cv2.destroyAllWindows()  # Close any OpenCV windows
-            cv2.waitKey(1)          # Allow the OS time to process the close
+            cv2.waitKey(1)  # Allow the OS time to process the close
             self.cap.release()

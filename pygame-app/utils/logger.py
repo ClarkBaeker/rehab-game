@@ -52,9 +52,6 @@ class Logger:
         current_time = time.strftime("%H:%M:%S")
         with open(self.trajectory_filename, mode="a", newline="") as file:
             writer = csv.writer(file)
-
-            # Write the data row
-            print("Trying to write data into trajectory file.")
             writer.writerow([current_time, finger_x, finger_y])
 
     def log_shared_data(self, shared_data):

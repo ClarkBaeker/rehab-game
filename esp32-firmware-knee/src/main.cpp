@@ -153,14 +153,12 @@ void loop() {
   // Serial.print(angle); Serial.print("\n");
 
   if (is_motor_on) {
-    if (angle > 20) {
-      if (angle > 30) {
-        if (angle > 40) drv.setWaveform(0, 87); // short pulses
-        else drv.setWaveform(0, 85); // medium
-      } else drv.setWaveform(0, 83); // long
+    if (angle > 5) {
+      if (angle > 15) drv.setWaveform(0, 14); // short pulses
+      else drv.setWaveform(0, 47); // medium
 
-      drv.setWaveform(1, 0); // end waveform
-      drv.go();
+    drv.setWaveform(1, 0); // end waveform
+    drv.go();
     }
   }
   // Serial.print(millis() - t); Serial.print(",");
