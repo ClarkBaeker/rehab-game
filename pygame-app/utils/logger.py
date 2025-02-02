@@ -1,9 +1,9 @@
 import os
 import json
 import time
+from datetime import datetime  
 from pathlib import Path
 import csv
-
 
 class Logger:
     def __init__(self):
@@ -34,8 +34,8 @@ class Logger:
 
             # Write header, if it does not exist (it should not, as it's the start of the game)
             file_exists = os.path.isfile(self.trajectory_filename)
-            if not file_exists:
-                writer.writerow(["timepoint", "finger_x", "finger_y"])
+            # if not file_exists:
+            writer.writerow(["timepoint", "time_in_microseconds", "finger_x", "finger_y"])
 
             print("Created trajectory file.")
         # create a CSV file to log the trajectory
@@ -45,12 +45,12 @@ class Logger:
 
             # Write header, if it does not exist (it should not, as it's the start of the game)
             file_exists = os.path.isfile(self.knee_angle_filename)
-            if not file_exists:
-                writer.writerow(["timepoint", "knee_angle"])
+            # if not file_exists:
+            writer.writerow(["timepoint", "time_in_microseconds", "knee_angle"])
 
             print("Created knee angle file.")
 
-    def append_finger_data(self, finger_x, finger_y):
+    def append_position_data(self, finger_x, finger_y):
         """
         Check if the file exists to determine if headers need to be written
         """
@@ -62,9 +62,10 @@ class Logger:
 
         # Add current trajectory data to the trajectory csv file
         current_time = time.strftime("%H:%M:%S")
+        current_microsecond = datetime.now().strftime("%f")
         with open(self.trajectory_filename, mode="a", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow([current_time, finger_x, finger_y])
+            writer.writerow([current_time, current_microsecond, finger_x, finger_y])
 
     def append_knee_angle(self, knee_angle):
         """
@@ -78,9 +79,10 @@ class Logger:
 
         # Add current trajectory data to the trajectory csv file
         current_time = time.strftime("%H:%M:%S")
+        current_microsecond = datetime.now().strftime("%f")
         with open(self.knee_angle_filename, mode="a", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow([current_time, knee_angle])
+            writer.writerow([current_time, current_microsecond, knee_angle])
 
     def log_shared_data(self, shared_data):
         """
