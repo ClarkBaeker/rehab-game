@@ -101,7 +101,7 @@ class GameManager:
 
         # Store data needed across screens
         self.shared_data = {
-            "game_mode": None,
+            "game_mode": "Connect the Dots",
             "level": "Level 1",
             "input_mode": "mouse",  # setting the default
             "start_time": None,
