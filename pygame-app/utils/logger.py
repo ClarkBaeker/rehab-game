@@ -15,6 +15,7 @@ class Logger:
         # Initialize the filenames
         self.game_log_filename = None
         self.trajectory_filename = None
+        self.knee_angle_filename = None
 
     def start_new_game(self):
         """
@@ -37,6 +38,17 @@ class Logger:
                 writer.writerow(["timepoint", "finger_x", "finger_y"])
 
             print("Created trajectory file.")
+        # create a CSV file to log the trajectory
+        self.knee_angle_filename = self.folder_name / f"knee_angle_{current_time}.csv"
+        with open(self.knee_angle_filename, mode="a", newline="") as file:
+            writer = csv.writer(file)
+
+            # Write header, if it does not exist (it should not, as it's the start of the game)
+            file_exists = os.path.isfile(self.knee_angle_filename)
+            if not file_exists:
+                writer.writerow(["timepoint", "knee_angle"])
+
+            print("Created knee angle file.")
 
     def append_finger_data(self, finger_x, finger_y):
         """
@@ -53,6 +65,22 @@ class Logger:
         with open(self.trajectory_filename, mode="a", newline="") as file:
             writer = csv.writer(file)
             writer.writerow([current_time, finger_x, finger_y])
+
+    def append_knee_angle(self, knee_angle):
+        """
+        Check if the file exists to determine if headers need to be written
+        """
+        # Raise warning if the filename is not set
+        if self.knee_angle_filename is None:
+            raise ValueError(
+                "knee_angle_filename is not set. Call start_new_game() first."
+            )
+
+        # Add current trajectory data to the trajectory csv file
+        current_time = time.strftime("%H:%M:%S")
+        with open(self.knee_angle_filename, mode="a", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow([current_time, knee_angle])
 
     def log_shared_data(self, shared_data):
         """

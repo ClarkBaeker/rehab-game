@@ -14,6 +14,7 @@ Adafruit_DRV2605 drv;  // vibromotor
 long int t0 = millis();
 uint8_t drive = 0;
 bool is_motor_on = false;
+double angle = 0;
 
 // WebSocket server address (ip address needs to be specified in wifi_credentials.h)
 const int WS_SERVER_PORT = 8765;
@@ -21,6 +22,7 @@ const int WS_SERVER_PORT = 8765;
 // WebSocket client instance
 WebSocketsClient webSocket;
 bool isWebSocketConnected = false; // Track connection status
+
 
 void handleWebSocketMessage(uint8_t *payload, size_t length) {
     JsonDocument doc;
@@ -48,8 +50,33 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
         webSocket.sendTXT("KneeESP");
         isWebSocketConnected = true;
   }
+  if (type == WStype_DISCONNECTED) {
+        // Send unique identifier
+        Serial.println("WebSocket disconnected!");
+        isWebSocketConnected = false;
+  }
   if (type == WStype_TEXT) {
     handleWebSocketMessage(payload, length);
+  }
+}
+
+void sendAngle(void *parameter) {
+  while (true) {  // Run forever until ESP32 is powered off
+    if(is_motor_on) {
+      if (isWebSocketConnected) {
+        String message;
+        JsonDocument doc;
+        doc["field"] = "angle";
+        doc["value"] = angle;
+
+        serializeJson(doc, message);
+        webSocket.sendTXT(message.c_str());
+        Serial.println("Message sent to server: " + message);
+      } else {
+          Serial.println("Angle could not be sent. WebSocket not connected");
+      }
+    }
+    vTaskDelay(pdMS_TO_TICKS(300));  // Delay for 300 milliseconds
   }
 }
 
@@ -61,12 +88,9 @@ void setup() {
     Serial.println("Connecting to WiFi...");
   }
   Serial.println("Connected to WiFi");
-  Serial.println("1");
   Wire.begin();
-  Serial.println("2");
   imu1.init();
   imu2.init();
-
   Serial.println("IMU initialized");
 
   imu1.setAccRange(ICM20948_ACC_RANGE_2G);
@@ -115,6 +139,16 @@ void setup() {
   webSocket.begin(WS_SERVER_IP, WS_SERVER_PORT, "/");
   webSocket.onEvent(webSocketEvent);
   webSocket.setReconnectInterval(5000);
+  // Create a FreeRTOS task
+  xTaskCreatePinnedToCore(
+      sendAngle,      // Task function
+      "RepeatedTask", // Name
+      10000,          // Stack size
+      NULL,           // Parameters
+      1,              // Priority
+      NULL,           // Task handle
+      1               // Core ID (0 or 1)
+  );
 }
 
 void loop() {
@@ -149,7 +183,7 @@ void loop() {
   double norm2 = sqrt(gvals2.x*gvals2.x + gvals2.y*gvals2.y);
   double angle2 = acos(gvals2.x / norm2);
 
-  double angle = (angle1 + angle2) * 57.29578; // in degrees
+  angle = (angle1 + angle2) * 57.29578; // in degrees
   // Serial.print(angle); Serial.print("\n");
 
   if (is_motor_on) {
@@ -162,13 +196,4 @@ void loop() {
     }
   }
   // Serial.print(millis() - t); Serial.print(",");
-
-  /* // Send a message every 5 seconds
-  static unsigned long lastMessageTime = 0;
-  if (isWebSocketConnected && millis() - lastMessageTime > 5000) {
-      lastMessageTime = millis();
-      String message = "Hello from ESP32!";
-      webSocket.sendTXT(message.c_str());
-      Serial.println("Message sent to server: " + message);
-  } */
 }

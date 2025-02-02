@@ -153,6 +153,7 @@ class GameScreen(ScreenInterface):
             ret, frame = self.cap.read()
             if ret:
                 self.process_finger_tracking(frame)
+
         # If the game has ended, switch screens
         if self.manager.game.game_ended:
             self.manager.switch_screen("END_OF_GAME_SCREEN")

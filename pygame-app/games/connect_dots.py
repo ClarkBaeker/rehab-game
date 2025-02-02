@@ -248,7 +248,6 @@ class TouchDots(GameInterface):
                     self._check_game_end_condition()
 
     def _check_game_end_condition(self):
-        print("Dots pressed: ", self.manager.shared_data["dots_pressed"])
         if self.manager.shared_data["dots_pressed"] >= self.how_often_to_press_dots:
             self.manager.shared_data["end_reason"] = "win"
             self.manager.shared_data["duration"] = int(

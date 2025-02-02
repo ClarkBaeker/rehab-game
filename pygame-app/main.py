@@ -27,14 +27,23 @@ from utils.logger import Logger
 connected_clients = {}
 
 
+def handle_message(client_id, message, game_manager):
+    print(f"Message from {client_id}: {message}")
+    message_json = json.loads(message)
+    # Example: Handle message from KneeESP
+    if client_id == "KneeESP":
+        if message_json["field"] == "angle":
+            game_manager.logger.append_knee_angle(message_json["value"])
+
+
 # WebSocket server logic
-async def handle_client(websocket):
+async def handle_client(websocket, game_manager):
     client_id = await websocket.recv()  # First message is the identifier
     connected_clients[client_id] = websocket
     print(f"Client connected: {client_id}")
     try:
         async for message in websocket:
-            print(f"Message from {client_id}: {message}")
+            handle_message(client_id, message, game_manager)
     except websockets.ConnectionClosed:
         print(f"Client disconnected: {client_id}")
     finally:
@@ -42,8 +51,10 @@ async def handle_client(websocket):
 
 
 # WebSocket server setup
-async def websocket_server():
-    server = await websockets.serve(handle_client, "0.0.0.0", 8765)
+async def websocket_server(game_manager):
+    server = await websockets.serve(
+        lambda ws: handle_client(ws, game_manager), "0.0.0.0", 8765
+    )
     print("WebSocket server running on ws://0.0.0.0:8765")
     await server.wait_closed()
 
@@ -62,8 +73,8 @@ async def send_message(client_id, message):
 
 
 # Thread wrapper for running the WebSocket server
-def start_websocket_server():
-    asyncio.run(websocket_server())
+def start_websocket_server(game_manager):
+    asyncio.run(websocket_server(game_manager))
 
 
 # Screen names as constants
@@ -179,12 +190,16 @@ class GameManager:
 
 
 def main():
+    # Create Pygame application
+    game_manager = GameManager()
+
     # Start WebSocket server in a separate thread
-    websocket_thread = threading.Thread(target=start_websocket_server, daemon=True)
+    websocket_thread = threading.Thread(
+        target=start_websocket_server, args=(game_manager,), daemon=True
+    )
     websocket_thread.start()
 
-    # Run the Pygame application
-    game_manager = GameManager()
+    # Run the game
     game_manager.run()
 
 
