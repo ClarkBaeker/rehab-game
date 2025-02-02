@@ -269,6 +269,7 @@ class GameScreen(ScreenInterface):
         Closes OpenCV windows and releases the webcam capture.
         """
         super().on_exit()
+        self.manager.game.end_game()
         if self.cap is not None:
             cv2.destroyAllWindows()  # Close any OpenCV windows
             cv2.waitKey(1)  # Allow the OS time to process the close

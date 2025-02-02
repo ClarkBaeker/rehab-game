@@ -112,7 +112,6 @@ class FeedbackScreen(ScreenInterface):
             print("currently handling", feedback)
         else:
             self.current_screen = self.feedback
-            print("currently in no feedback. Feedback still is:", feedback)
 
         # Audio feedback, if button is pressed
         if self.click_sound:

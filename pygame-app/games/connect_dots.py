@@ -11,7 +11,7 @@ HIGHLIGHTED_COLOR = (255, 0, 0)
 
 class TouchDots(GameInterface):
 
-    def __init__(self, manager, level=None):
+    def __init__(self, manager, level=1):
         super().__init__(manager, level)
         self.level = level
 
@@ -122,9 +122,15 @@ class TouchDots(GameInterface):
         self.active_dot_id: int = None
         self.how_often_to_press_dots = 5
         self.maximum_duration = 5 * 60  # in seconds
-        if self.level == 2:
+        if self.level == 1: 
+            self.how_often_to_press_dots = 5
+            self.maximum_duration = 3 * 60
+        elif self.level == 2:
             self.how_often_to_press_dots = 30
             self.maximum_duration = 3 * 60
+        else: 
+            print("Level not found")
+            
         self.positive_sound = load_sound("sounds/positive_sound.mp3")
 
     def start(self):
@@ -229,6 +235,7 @@ class TouchDots(GameInterface):
                     self._highlight_new_dot()
 
     def _check_game_end_condition(self):
+        print("Dots pressed: ", self.manager.shared_data["dots_pressed"])
         if self.manager.shared_data["dots_pressed"] >= self.how_often_to_press_dots:
             self.manager.shared_data["end_reason"] = "win"
             self.manager.shared_data["duration"] = int(
