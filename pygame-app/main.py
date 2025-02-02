@@ -103,6 +103,7 @@ class GameManager:
         self.shared_data = {
             "game_mode": None,
             "level": "Level 1",
+            "input_mode": "mouse",  # setting the default
             "start_time": None,
             "end_reason": None,  # "win", "timeout", or "early_abort"
             "duration": None,  # duration of game

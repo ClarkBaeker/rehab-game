@@ -134,7 +134,6 @@ class TouchDots(GameInterface):
         self.how_often_to_press_dots = len(self.order)
         self.maximum_duration = 3 * 60
         self.current_idx = 0
-
         self.positive_sound = load_sound("sounds/positive_sound.mp3")
 
     def start(self):
@@ -249,6 +248,7 @@ class TouchDots(GameInterface):
                     self._check_game_end_condition()
 
     def _check_game_end_condition(self):
+        print("Dots pressed: ", self.manager.shared_data["dots_pressed"])
         if self.manager.shared_data["dots_pressed"] >= self.how_often_to_press_dots:
             self.manager.shared_data["end_reason"] = "win"
             self.manager.shared_data["duration"] = int(

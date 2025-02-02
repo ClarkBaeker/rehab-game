@@ -78,7 +78,10 @@ class FeedbackScreen(ScreenInterface):
 
     def on_enter(self):
         super().on_enter()
-
+        # Reset feedback screen. 
+        self.manager.shared_data["feedback"] = None # is already set somewhere else, just to ensure any potential bugs 
+        self.current_screen = self.feedback
+        
     def go_forward(self):
         # Log data
         self.manager.logger.log_shared_data(self.manager.shared_data)
@@ -109,7 +112,6 @@ class FeedbackScreen(ScreenInterface):
             print("currently handling", feedback)
         else:
             self.current_screen = self.feedback
-            print("currently in no feedback. Feedback still is:", feedback)
 
         # Audio feedback, if button is pressed
         if self.click_sound:
