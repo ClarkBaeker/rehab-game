@@ -154,13 +154,18 @@ class TouchDots(GameInterface):
         if self.manager.shared_data["input_mode"] == "mouse":
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mx, my = event.pos
-                self._check_dot_collision(mx, my)
-            self._check_game_end_condition()
+                self.update(mx, my, check_collision=True)
+            else: 
+                # Do not check collision, as the mouse is not pressed
+                mx, my = pygame.mouse.get_pos()
+                self.update(mx, my, check_collision=False)
 
-    def update(self, finger_x, finger_y):
+    def update(self, pos_x, pos_y, check_collision=True):
         super().update()
-        self._check_dot_collision(finger_x, finger_y)
-        self._check_game_end_condition()
+        self.manager.logger.append_position_data(pos_x, pos_y)
+        if check_collision: 
+            self._check_dot_collision(pos_x, pos_y)
+            self._check_game_end_condition()
 
     def draw(self, surface):
         super().draw(surface)
