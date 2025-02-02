@@ -3,7 +3,6 @@ import time
 from screens.screen_interface import ScreenInterface
 from utils.utils import render_text, render_centered_test, load_sound
 from utils.invisible_button import InvisibleButton
-from utils.logger import log_data
 
 
 class EndOfGameScreen(ScreenInterface):
@@ -84,19 +83,6 @@ class EndOfGameScreen(ScreenInterface):
             (255, 255, 255),
             (self.manager.screen_width // 2, self.manager.screen_height // 2 + 75),
         )
-
-        # render_text(surface, "How did you feel during the exercise?", self.manager.minimum_letter_size, (0, 0, 0),
-        #             (50, 150))
-
-        # # Draw feedback buttons (simple squares/circles)
-        # pygame.draw.circle(surface, (0, 255, 0), (self.feedback_buttons["happy"].center), 50)   # happy
-        # pygame.draw.circle(surface, (255, 255, 0), (self.feedback_buttons["mid"].center), 50)   # mid
-        # pygame.draw.circle(surface, (255, 0, 0), (self.feedback_buttons["sad"].center), 50)     # sad
-
-        # # Confirm button
-        # pygame.draw.rect(surface, (0, 200, 0), self.confirm_button_rect)
-        # render_text(surface, "Confirm", self.manager.minimum_letter_size, (255, 255, 255),
-        #             (self.confirm_button_rect.centerx - 30, self.confirm_button_rect.centery - 10))
 
         # Debug: Draw debug rectangles to verify button placement
         if self.manager.debug:

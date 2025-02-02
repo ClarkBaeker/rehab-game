@@ -21,6 +21,8 @@ import pygame
 import json
 import threading
 
+from utils.logger import Logger
+
 # Dictionary to store connected clients
 connected_clients = {}
 
@@ -75,6 +77,10 @@ CONFIGURATION_SCREEN = "CONFIGURATION_SCREEN"
 EXPLANATION_SCREEN_CONNECTDOTS = "EXPLANATION_SCREEN_CONNECTDOTS"
 EXPLANATION_SCREEN_CIRCLEDOTS = "EXPLANATION_SCREEN_CIRCLEDOTS"
 
+# ESP clients
+BOARD_CLIENT = "BoardESP"
+KNEE_CLIENT = "KneeESP"
+
 
 class GameManager:
     def __init__(self):
@@ -96,10 +102,10 @@ class GameManager:
         # Store data needed across screens
         self.shared_data = {
             "game_mode": None,
-            "level": None,
+            "level": "Level 1",
             "start_time": None,
             "end_reason": None,  # "win", "timeout", or "early_abort"
-            "duration": None,  # duration of last game
+            "duration": None,  # duration of game
             "feedback": None,
         }
 
@@ -119,6 +125,11 @@ class GameManager:
             EXPLANATION_SCREEN_CONNECTDOTS: ExplanationConnectDots(self),
             EXPLANATION_SCREEN_CIRCLEDOTS: ExplanationCircleDots(self),
         }
+
+        # Initialize logger
+        self.logger = Logger()
+
+        self.clients = [BOARD_CLIENT, KNEE_CLIENT]
 
         # Game dependent variables
         self.game: GameInterface = TouchDots(self)
@@ -158,6 +169,12 @@ class GameManager:
         self.screens[self.current_screen_name].on_exit()
         self.current_screen_name = screen_name
         self.screens[self.current_screen_name].on_enter()
+
+    def send_message(self, client_id, message):
+        if client_id not in self.clients:
+            print(f"Client {client_id} not found")
+            return
+        asyncio.run(send_message(client_id, message))
 
 
 def main():
