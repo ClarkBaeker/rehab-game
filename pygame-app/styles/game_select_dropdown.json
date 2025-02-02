@@ -1,0 +1,32 @@
+{
+        
+        "drop_down_menu.#selected_option":
+        {
+           "misc":
+            {
+            "border_width": "1",
+               "open_button_width": "10"
+            },
+            "font":
+            {
+                "size": "24",
+                "colour": "#ffffff"
+            }
+        },
+        "drop_down_menu.#drop_down_options_list":
+        {
+            "selection_list.@selection_list_item":
+            {
+                "misc":
+                {
+                    "border_width": "1"
+                },
+                "font":
+                {
+                    "size": "24",
+                    "colour": "#ffffff"
+                }
+            }
+            
+        }
+    }

@@ -12,6 +12,7 @@ from screens.end_of_game_screen import EndOfGameScreen
 from screens.feedback_screen import FeedbackScreen
 from screens.repeat_screen import RepeatScreen
 from screens.configuration_screen import ConfigurationScreen
+from screens.game_selection_screen import GameSelectionScreen
 
 import asyncio
 import websockets
@@ -77,6 +78,7 @@ def start_websocket_server(game_manager):
 
 # Screen names as constants
 HOME_SCREEN = "HOME_SCREEN"
+GAME_SELECTION_SCREEN = "GAME_SELECTION_SCREEN"
 EXPLANATION_SCREEN = "EXPLANATION_SCREEN"
 GAME_SCREEN = "GAME_SCREEN"
 END_OF_GAME_SCREEN = "END_OF_GAME_SCREEN"
@@ -124,6 +126,7 @@ class GameManager:
         # Create instances of all screens
         self.screens = {
             HOME_SCREEN: HomeScreen(self),
+            GAME_SELECTION_SCREEN: GameSelectionScreen(self),
             EXPLANATION_SCREEN: ExplanationScreen(self),
             GAME_SCREEN: GameScreen(self),
             END_OF_GAME_SCREEN: EndOfGameScreen(self),

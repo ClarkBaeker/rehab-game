@@ -2,14 +2,13 @@ import pygame
 from utils.utils import load_image
 from screens.screen_interface import ScreenInterface
 
+
 class HomeScreen(ScreenInterface):
     def __init__(self, manager):
         super().__init__(manager)
 
-        self.background = pygame.image.load(
-            "images/start.png"
-        ).convert()
-                
+        self.background = pygame.image.load("images/start.png").convert()
+
         # Invisible button area in the middle
         button_width = 800
         button_height = 1000
@@ -20,8 +19,8 @@ class HomeScreen(ScreenInterface):
             ),
             (button_width, button_height),
         )
-        
-        # Invisible button area in the upper left corner for the configuration file 
+
+        # Invisible button area in the upper left corner for the configuration file
         button_width = 100
         button_height = 100
         self.config_button_rect = pygame.Rect(
@@ -39,7 +38,7 @@ class HomeScreen(ScreenInterface):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # left click
                 if self.start_button_rect.collidepoint(event.pos):
-                    self.manager.switch_screen("EXPLANATION_SCREEN")
+                    self.manager.switch_screen("GAME_SELECTION_SCREEN")
                 if self.config_button_rect.collidepoint(event.pos):
                     self.manager.switch_screen("CONFIGURATION_SCREEN")
 

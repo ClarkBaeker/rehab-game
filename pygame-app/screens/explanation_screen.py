@@ -28,7 +28,7 @@ class ExplanationScreen(ScreenInterface):
         super().on_enter()
 
     def go_back(self):
-        self.manager.switch_screen("HOME_SCREEN")
+        self.manager.switch_screen("GAME_SELECTION_SCREEN")
 
     def go_forward(self):
         self.manager.switch_screen("GAME_SCREEN")
@@ -41,8 +41,6 @@ class ExplanationScreen(ScreenInterface):
     def update(self):
         super().update()
 
-
-
     def draw(self, surface):
         super().draw(surface)
         # Draw the background
@@ -54,7 +52,9 @@ class ExplanationScreen(ScreenInterface):
         white = (255, 255, 255)
 
         if self.manager.shared_data["game_mode"] == "Connect the Dots":
-            title_surface = titleFont.render("Punkte verbinden", True, white)  # True enables anti-aliasing
+            title_surface = titleFont.render(
+                "Punkte verbinden", True, white
+            )  # True enables anti-aliasing
             text_surface = """
             Willkommen! 
             
@@ -69,7 +69,9 @@ class ExplanationScreen(ScreenInterface):
 
         elif self.manager.shared_data["game_mode"] == "Circle the Dots":
             # text and title
-            title_surface = titleFont.render("Kreise zeichnen", True, white)  # True enables anti-aliasing
+            title_surface = titleFont.render(
+                "Kreise zeichnen", True, white
+            )  # True enables anti-aliasing
             text_surface = """
             Willkommen! 
             
@@ -81,7 +83,6 @@ class ExplanationScreen(ScreenInterface):
             aufleuchtenden Punkte zu zeichnen.
             
             Viel Spaß!"""
-
 
         # Get the rectangles for positioning
         x, y = 180, 200
