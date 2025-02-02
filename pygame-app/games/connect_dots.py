@@ -122,14 +122,26 @@ class TouchDots(GameInterface):
             )
         self.active_dot_id: int = None
         self.maximum_duration = 5 * 60  # in seconds
-        if self.level == "Level 1":
-            self.order = [9, 10, 11]
 
-        if self.level == "Level 2":
-            self.order = [9, 8, 5, 0]
+        if self.manager.shared_data["game_mode"] == "Connect the Dots":
+            if self.level == "Level 1":
+                self.order = [9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2]
 
-        if self.level == "Level 3":
-            self.order = [9, 7, 5, 2]
+            if self.level == "Level 2":
+                self.order = [9, 7, 5, 4, 3, 7, 11, 1, 9]
+
+            if self.level == "Level 3":
+                self.order = [9, 7, 5, 4, 3, 6, 9, 10, 11, 8, 5, 1, 3, 7, 11]
+
+        elif self.manager.shared_data["game_mode"] == "Circle the Dots":
+            if self.level == "Level 1":
+                self.order = [7, 4, 8, 10, 6]
+
+            if self.level == "Level 2":
+                self.order = [7, 4, 8, 10, 6, 3, 1, 5, 11, 9]
+
+            if self.level == "Level 3":
+                self.order = [10, 7, 4, 0, 1, 2]
 
         self.how_often_to_press_dots = len(self.order)
         self.maximum_duration = 3 * 60
@@ -138,6 +150,7 @@ class TouchDots(GameInterface):
 
     def start(self):
         super().start()
+        self.current_idx = 0
         self.manager.shared_data["dots_pressed"] = (
             0  # will store the number of dots pressed
         )
