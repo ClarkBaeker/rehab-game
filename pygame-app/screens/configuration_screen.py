@@ -71,13 +71,7 @@ class ConfigurationScreen(ScreenInterface):
         super().on_enter()
 
     def handle_event(self, event):
-        # if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-        #     if self.back_button_rect.collidepoint(event.pos):
-        #         # Save the chosen input mode
-        #         self.manager.shared_data["input_mode"] = self.input_mode_dropdown.selected_option[0]
-        #         print(self.manager.shared_data["input_mode"])
-        #         self.manager.switch_screen("HOME_SCREEN")
-
+        
         # Let the UI manager handle GUI events (e.g. calibration button)
         self.ui_manager.process_events(event)
 

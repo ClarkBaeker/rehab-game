@@ -98,6 +98,7 @@ class GameManager:
         # Store data needed across screens
         self.shared_data = {
             "game_mode": None,
+            "input_mode": "mouse", # setting the default
             "level": None,
             "start_time": None,
             "end_reason": None,  # "win", "timeout", or "early_abort"
