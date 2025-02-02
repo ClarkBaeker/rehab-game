@@ -114,7 +114,7 @@ void setup() {
    *    You achieve lowest noise using level 6  
    */
   imu1.setAccDLPF(ICM20948_DLPF_6);
-  imu2.setAccDLPF(ICM20948_DLPF_7);    
+  imu2.setAccDLPF(ICM20948_DLPF_6);    
   
   /*  Acceleration sample rate divider divides the output rate of the accelerometer.
    *  Sample rate = Basic sample rate / (1 + divider) 
@@ -123,8 +123,8 @@ void setup() {
    *  If sample rates are set for the accelerometer and the gyroscope, the gyroscope
    *  sample rate has priority.
    */
-  imu1.setAccSampleRateDivider(5); // fs = 187.5 Hz
-  imu2.setAccSampleRateDivider(5); // = 1125 * loop_duration - 1
+  imu1.setAccSampleRateDivider(6); // fs = 179 Hz
+  imu2.setAccSampleRateDivider(6); // = 1125 * loop_duration - 1
 
   drv.begin();
   // drv.setMode(DRV2605_MODE_REALTIME); // continuous drive
@@ -156,7 +156,6 @@ void loop() {
   webSocket.loop();
 
   long int t = millis();
-  // Serial.print(t); Serial.print(",");
   imu1.readSensor();
   xyzFloat gvals1;
   imu1.getGValues( &gvals1 );
