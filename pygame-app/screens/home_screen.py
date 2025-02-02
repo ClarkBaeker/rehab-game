@@ -39,10 +39,7 @@ class HomeScreen(ScreenInterface):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # left click
                 if self.start_button_rect.collidepoint(event.pos):
-                    if self.manager.shared_data["game_mode"] == "Connect the Dots":
-                        self.manager.switch_screen("EXPLANATION_SCREEN_CONNECTDOTS")
-                    elif self.manager.shared_data["game_mode"] == "Circle the Dots":
-                        self.manager.switch_screen("EXPLANATION_SCREEN_CIRCLEDOTS")
+                    self.manager.switch_screen("EXPLANATION_SCREEN")
                 if self.config_button_rect.collidepoint(event.pos):
                     self.manager.switch_screen("CONFIGURATION_SCREEN")
 
