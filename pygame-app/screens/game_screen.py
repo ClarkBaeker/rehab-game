@@ -79,14 +79,13 @@ class GameScreen(ScreenInterface):
             self.manager.game, "game_screen_width", self.manager.screen_width / 2
         )
         self.game_screen_height = getattr(
-            self.manager.game, "game_screen_height", self.manager.screen_height * 5 / 6
+            self.manager.game, "game_screen_height", self.manager.screen_height * 4 / 6
         )
 
         self.x_offset = (self.manager.screen_width - self.game_screen_width) / 2
         # Push the game screen down so lower boundary isn’t visible
         self.y_offset = (
-            self.manager.screen_height - self.game_screen_height + self.border_width
-        )
+            self.manager.screen_height - self.game_screen_height) / 2 #   + self.border_width
 
     def initialize_finger_tracking(self):
         """
@@ -176,6 +175,7 @@ class GameScreen(ScreenInterface):
             # Update the game logic with these coordinates
             self.finger_x, self.finger_y = mapped_x, mapped_y
             self.manager.game.update(self.finger_x, self.finger_y)
+            self.manager.logger.append_position_data(self.finger_x, self.finger_y)
 
             # Draw a red circle in the camera feed where the finger is
             cv2.circle(frame, (cam_x, cam_y), 10, (0, 0, 255), -1)
@@ -238,7 +238,6 @@ class GameScreen(ScreenInterface):
             pygame.draw.circle(
                 surface, (255, 0, 0), (int(self.finger_x), int(self.finger_y)), 10
             )
-            self.manager.logger.append_finger_data(self.finger_x, self.finger_y)
 
         # Debug outlines for buttons
         if self.manager.debug:
@@ -273,4 +272,4 @@ class GameScreen(ScreenInterface):
         if self.cap is not None:
             cv2.destroyAllWindows()  # Close any OpenCV windows
             cv2.waitKey(1)  # Allow the OS time to process the close
-            self.cap.release()
+            self.cap.release() 

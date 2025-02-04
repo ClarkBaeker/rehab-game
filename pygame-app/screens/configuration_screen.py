@@ -11,13 +11,6 @@ game_mode_mapping = {
     "Circle the Dots": TouchDots,
 }
 
-# level_mapping = {
-#     "Level 1": None,
-#     "Level 2": None,
-#     "level 3": None
-# }
-
-
 class ConfigurationScreen(ScreenInterface):
     def __init__(self, manager):
         super().__init__(manager)

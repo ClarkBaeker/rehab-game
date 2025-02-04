@@ -16,6 +16,9 @@ class EndOfGameScreen(ScreenInterface):
         self.background_20_lights = pygame.image.load(
             "images/well_done_20_lights.png"
         ).convert()
+        self.background_forward = pygame.image.load(
+            "images/well_done.png"
+        ).convert()
 
         self.feedback_buttons = {
             "happy": pygame.Rect(
@@ -66,15 +69,21 @@ class EndOfGameScreen(ScreenInterface):
         minutes = self.manager.shared_data["duration"] // 60
         seconds = self.manager.shared_data["duration"] % 60
 
+        print(reason)
         if reason == "20_reached":
             # text = f"Well done! You touched all 20 dots in {minutes} minutes and {seconds} seconds."
             surface.blit(self.background_20_lights, (0, 0))
             text = f"{minutes} Minuten and {seconds} Sekunden"
 
-        else:
+        elif reason == "5_min_reached":
             # text = f"Well done! You touched {dots_pressed} dots."
             surface.blit(self.background_5_min, (0, 0))
             text = f"{dots_pressed}"
+            
+        else: 
+            surface.blit(self.background_forward, (0, 0))
+            text = f"{dots_pressed}"
+            # text = "Well done!"
 
         render_centered_test(
             surface,
