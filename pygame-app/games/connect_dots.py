@@ -17,14 +17,14 @@ class TouchDots(GameInterface):
         print(self.level)
 
         # Define the size of the game screen
-        self.game_screen_width = self.manager.screen_width * 1 / 2
-        self.game_screen_height = self.manager.screen_height * 5 / 6
+        scaler = 50
+        self.game_screen_width = 12 * scaler 
+        self.game_screen_height = 12 * scaler 
 
         # Dots are drawn in percent from the center of the screen
-        dist_x = 12  # horizontal distance between dots, in percent. Assumption: Non-even number
-        dist_y = (
-            12  # vertical distance between dots, in percent. Assumption: Even number
-        )
+        dist_x = 1/3 # horizontal distance between dots, as ratio 
+        dist_y = 1/4 # vertical distance between dots, as ratio
+    
 
         self.dots = [
             {
@@ -115,9 +115,9 @@ class TouchDots(GameInterface):
 
         for c in self.dots:
             c["pos"] = (
-                c["pos"][0] / 100 * self.manager.screen_width
+                c["pos"][0] * self.game_screen_width 
                 + self.manager.screen_width / 2,
-                c["pos"][1] / 100 * (self.manager.screen_height)
+                c["pos"][1] * (self.game_screen_height)
                 + self.manager.screen_height / 2,
             )
         self.active_dot_id: int = None
