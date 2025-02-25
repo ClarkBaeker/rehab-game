@@ -25,17 +25,6 @@ class GameSelectionScreen(ScreenInterface):
             theme_path="styles/game_select_dropdown.json",
         )
 
-        """ # Modify the theme for the dropdown menu
-        self.ui_manager.get_theme().load_theme(
-            {
-                "drop_down_menu": {
-                    "name": "fira_code",  # Default font (can be any available font)
-                    "size": 48,  # Set the font size
-                    "text_horiz_alignment": "center",  # Center align text
-                }
-            }
-        ) """
-
         # Dropdown to select game mode
         self.game_mode_dropdown = pygame_gui.elements.UIDropDownMenu(
             options_list=["Connect the Dots", "Circle the Dots"],
@@ -79,17 +68,18 @@ class GameSelectionScreen(ScreenInterface):
         self.manager.shared_data["game_mode"] = self.game_mode_dropdown.selected_option[
             0
         ]
-        print(self.manager.shared_data["game_mode"])
         selected_game_class = game_mode_mapping.get(
             self.game_mode_dropdown.selected_option[0], TouchDots
         )
-
         self.manager.shared_data["level"] = self.level_dropdown.selected_option[0]
+        print(
+            f"{self.manager.shared_data['game_mode']} ({self.manager.shared_data['level']}) has been selected."
+        )
         self.manager.game = selected_game_class(self.manager)
         self.manager.switch_screen("EXPLANATION_SCREEN")
 
-    def handle_event(self, event):  # , time_delta):
-        # Let the UI manager handle GUI events (e.g. calibration button)
+    def handle_event(self, event):
+        # Let the UI manager handle GUI events
         self.ui_manager.process_events(event)
         # Delegate events to the invisible buttons
         self.back_button.handle_event(event)
@@ -102,6 +92,7 @@ class GameSelectionScreen(ScreenInterface):
 
     def draw(self, surface):
         super().draw(surface)
+
         # Draw the background
         surface.blit(self.background, (0, 0))
 

@@ -1,5 +1,4 @@
 import pygame
-from utils.utils import load_image
 from screens.screen_interface import ScreenInterface
 
 

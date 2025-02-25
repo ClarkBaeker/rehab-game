@@ -1,9 +1,8 @@
 import pygame
 import time
 from screens.screen_interface import ScreenInterface
-from utils.utils import render_text, render_centered_test, load_sound
+from utils.utils import load_sound
 from utils.invisible_button import InvisibleButton
-# from utils.logger import log_data
 
 
 class FeedbackScreen(ScreenInterface):
@@ -74,17 +73,17 @@ class FeedbackScreen(ScreenInterface):
 
         # Sounds
         self.click_sound = load_sound("sounds/mouse-click.mp3")
-        print(self.click_sound)
 
     def on_enter(self):
         super().on_enter()
-        # Reset feedback screen. 
-        self.manager.shared_data["feedback"] = None # is already set somewhere else, just to ensure any potential bugs 
         self.current_screen = self.feedback
-        
+
     def go_forward(self):
         # Log data
         self.manager.logger.log_shared_data(self.manager.shared_data)
+
+        # Remove shared data that is specific to game
+        self.manager.game.rmv_shared_data()
 
         # Debug: Print feedback
         if self.manager.debug:

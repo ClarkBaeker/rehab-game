@@ -5,6 +5,7 @@ import cv2
 from screens.screen_interface import ScreenInterface
 from utils.invisible_button import InvisibleButton
 
+
 WINDOW_NAME = "Finger Tracking Window"
 
 
@@ -49,6 +50,7 @@ class GameScreen(ScreenInterface):
         # Reset shared_data, such that the game can be restarted
         self.manager.game.game_ended = False
         self.manager.shared_data["start_time"] = None
+        self.manager.shared_data["end_time"] = None
         self.manager.shared_data["end_reason"] = None
         self.manager.shared_data["feedback"] = None
 
@@ -85,7 +87,8 @@ class GameScreen(ScreenInterface):
         self.x_offset = (self.manager.screen_width - self.game_screen_width) / 2
         # Push the game screen down so lower boundary isn’t visible
         self.y_offset = (
-            self.manager.screen_height - self.game_screen_height) / 2 #   + self.border_width
+            self.manager.screen_height - self.game_screen_height
+        ) / 2  #   + self.border_width
 
     def initialize_finger_tracking(self):
         """
@@ -114,11 +117,7 @@ class GameScreen(ScreenInterface):
         Called when the back button is pressed.
         Ends the game and switches to explanation screen.
         """
-        self.manager.game.end_game()
         self.manager.shared_data["end_reason"] = "early_abort"
-        self.manager.shared_data["duration"] = int(
-            time.time() - self.manager.shared_data["start_time"]
-        )
         self.manager.switch_screen("EXPLANATION_SCREEN")
 
     def go_forward(self):
@@ -126,11 +125,7 @@ class GameScreen(ScreenInterface):
         Called when the forward button is pressed.
         Ends the game early and moves to the end-of-game screen.
         """
-        self.manager.game.end_game()
         self.manager.shared_data["end_reason"] = "early_abort"
-        self.manager.shared_data["duration"] = int(
-            time.time() - self.manager.shared_data["start_time"]
-        )
         self.manager.switch_screen("END_OF_GAME_SCREEN")
 
     def handle_event(self, event):
@@ -248,7 +243,7 @@ class GameScreen(ScreenInterface):
         """
         Scale the raw x-coordinate to fit the game screen area.
         """
-        if not self.game_screen_width:
+        if self.game_screen_width is None:
             return x
         return (x / self.manager.screen_width) * self.game_screen_width + self.x_offset
 
@@ -256,7 +251,7 @@ class GameScreen(ScreenInterface):
         """
         Scale the raw y-coordinate to fit the game screen area.
         """
-        if not self.game_screen_height:
+        if self.game_screen_height is None:
             return y
         return (
             y / self.manager.screen_height
@@ -272,4 +267,4 @@ class GameScreen(ScreenInterface):
         if self.cap is not None:
             cv2.destroyAllWindows()  # Close any OpenCV windows
             cv2.waitKey(1)  # Allow the OS time to process the close
-            self.cap.release() 
+            self.cap.release()

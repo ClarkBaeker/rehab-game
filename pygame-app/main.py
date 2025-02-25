@@ -1,25 +1,19 @@
+import asyncio
+import json
 import pygame
 import sys
-import os
-from pathlib import Path
+import threading
+import websockets
 
-from games.connect_dots import TouchDots
+from screens.configuration_screen import ConfigurationScreen
 from games.game_interface import GameInterface
-from screens.home_screen import HomeScreen
+from screens.game_selection_screen import GameSelectionScreen
 from screens.explanation_screen import ExplanationScreen
-from screens.game_screen import GameScreen
 from screens.end_of_game_screen import EndOfGameScreen
 from screens.feedback_screen import FeedbackScreen
+from screens.game_screen import GameScreen
+from screens.home_screen import HomeScreen
 from screens.repeat_screen import RepeatScreen
-from screens.configuration_screen import ConfigurationScreen
-from screens.game_selection_screen import GameSelectionScreen
-
-import asyncio
-import websockets
-import pygame
-import json
-import threading
-
 from utils.logger import Logger
 
 # Dictionary to store connected clients
@@ -29,7 +23,6 @@ connected_clients = {}
 def handle_message(client_id, message, game_manager):
     print(f"Message from {client_id}: {message}")
     message_json = json.loads(message)
-    # Example: Handle message from KneeESP
     if client_id == "KneeESP":
         if message_json["field"] == "angle":
             game_manager.logger.append_knee_angle(message_json["value"])
@@ -58,7 +51,7 @@ async def websocket_server(game_manager):
     await server.wait_closed()
 
 
-# Function to send a message to a specific client
+# Send a message to a specific client
 async def send_message(client_id, message):
     if client_id in connected_clients:
         websocket = connected_clients[client_id]
@@ -76,7 +69,7 @@ def start_websocket_server(game_manager):
     asyncio.run(websocket_server(game_manager))
 
 
-# Screen names as constants
+# Screen name constants
 HOME_SCREEN = "HOME_SCREEN"
 GAME_SELECTION_SCREEN = "GAME_SELECTION_SCREEN"
 EXPLANATION_SCREEN = "EXPLANATION_SCREEN"
@@ -86,7 +79,7 @@ FEEDBACK_SCREEN = "FEEDBACK_SCREEN"
 REPEAT_SCREEN = "REPEAT_SCREEN"
 CONFIGURATION_SCREEN = "CONFIGURATION_SCREEN"
 
-# ESP clients
+# ESP-client name constants
 BOARD_CLIENT = "BoardESP"
 KNEE_CLIENT = "KneeESP"
 
@@ -112,15 +105,15 @@ class GameManager:
         self.shared_data = {
             "game_mode": "Circle the Dots",
             "level": "Level 1",
-            "input_mode": "mouse",  # setting the default
+            "input_mode": "mouse",  # "mouse" or "finger"
             "start_time": None,
             "end_reason": None,  # "win", "timeout", or "early_abort"
-            "duration": None,  # duration of game
-            "feedback": None,
+            "feedback": None,  # "happy", "medium", or "sad"
         }
 
         # The clock is used to limit FPS and track time
         self.clock = pygame.time.Clock()
+        # The current screen initialized to the home screen
         self.current_screen_name = HOME_SCREEN
 
         # Create instances of all screens
@@ -138,10 +131,10 @@ class GameManager:
         # Initialize logger
         self.logger = Logger()
 
-        self.clients = [BOARD_CLIENT, KNEE_CLIENT]
+        self.allowed_clients = [BOARD_CLIENT, KNEE_CLIENT]
 
         # Game dependent variables
-        self.game: GameInterface = TouchDots(self)
+        self.game: GameInterface = None
 
     def run(self):
         while True:
@@ -151,14 +144,6 @@ class GameManager:
                     self.screens[self.current_screen_name].on_exit()
                     pygame.quit()
                     sys.exit()
-                ##################
-                # Send command when a key is pressed
-                # Example: Send a message to a client when a key is pressed
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    message = {"command": "turn_on", "led_id": 1}
-                    asyncio.run(send_message("BoardESP", message))
-                ##################
-                # Pass events to the current screen
                 self.screens[self.current_screen_name].handle_event(event)
 
             # Update current screen
@@ -180,8 +165,8 @@ class GameManager:
         self.screens[self.current_screen_name].on_enter()
 
     def send_message(self, client_id, message):
-        if client_id not in self.clients:
-            print(f"Client {client_id} not found")
+        if client_id not in self.allowed_clients:
+            print(f"Client {client_id} not in list of allowed clients")
             return
         asyncio.run(send_message(client_id, message))
 

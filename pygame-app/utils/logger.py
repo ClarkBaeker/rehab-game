@@ -1,9 +1,10 @@
 import os
 import json
 import time
-from datetime import datetime  
+from datetime import datetime
 from pathlib import Path
 import csv
+
 
 class Logger:
     def __init__(self):
@@ -35,7 +36,9 @@ class Logger:
             # Write header, if it does not exist (it should not, as it's the start of the game)
             file_exists = os.path.isfile(self.trajectory_filename)
             # if not file_exists:
-            writer.writerow(["timepoint", "time_in_microseconds", "finger_x", "finger_y"])
+            writer.writerow(
+                ["timepoint", "time_in_microseconds", "finger_x", "finger_y"]
+            )
 
             print("Created trajectory file.")
         # create a CSV file to log the trajectory
@@ -84,7 +87,7 @@ class Logger:
             writer = csv.writer(file)
             writer.writerow([current_time, current_microsecond, knee_angle])
 
-    def log_shared_data(self, shared_data):
+    def log_shared_data(self, shared_data: dict):
         """
         Logs all relevant data to a JSON file.
         """
@@ -97,21 +100,25 @@ class Logger:
         # Prepare the data to save
         log = {
             "date": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "dots_pressed": shared_data["dots_pressed"],
             "end_reason": shared_data["end_reason"],
             "feedback": shared_data["feedback"],
             "total_duration_seconds": None,
-            "press_times": [],
         }
 
+        # Include optional log data that depend on game type
+        optional_log = {"dots_pressed": shared_data["dots_pressed"]}
+        for opt_key in optional_log.keys():
+            if opt_key in shared_data.keys():
+                log[opt_key] = shared_data[opt_key]
+
         # Calculate total duration if available
-        if shared_data["start_time"]:
+        if shared_data["start_time"] and shared_data["end_time"]:
             log["total_duration_seconds"] = round(
-                time.time() - shared_data["start_time"], 2
+                shared_data["end_time"] - shared_data["start_time"], 2
             )
 
         # Include all recorded press times
-        if shared_data["start_time"]:
+        if shared_data["start_time"] and shared_data["press_times"]:
             log["press_times"] = [
                 {
                     "time_since_start": round(

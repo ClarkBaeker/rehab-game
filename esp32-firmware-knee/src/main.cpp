@@ -45,13 +45,12 @@ void handleWebSocketMessage(uint8_t *payload, size_t length) {
 
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
   if (type == WStype_CONNECTED) {
-        // Send unique identifier
+        // Send unique identifier when connected to server
         Serial.println("WebSocket connected!");
         webSocket.sendTXT("KneeESP");
         isWebSocketConnected = true;
   }
   if (type == WStype_DISCONNECTED) {
-        // Send unique identifier
         Serial.println("WebSocket disconnected!");
         isWebSocketConnected = false;
   }
@@ -61,7 +60,7 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
 }
 
 void sendAngle(void *parameter) {
-  while (true) {  // Run forever until ESP32 is powered off
+  while (true) {
     if(is_motor_on) {
       if (isWebSocketConnected) {
         String message;
@@ -76,7 +75,7 @@ void sendAngle(void *parameter) {
           Serial.println("Angle could not be sent. WebSocket not connected");
       }
     }
-    vTaskDelay(pdMS_TO_TICKS(300));  // Delay for 300 milliseconds
+    vTaskDelay(pdMS_TO_TICKS(300));
   }
 }
 
@@ -88,10 +87,11 @@ void setup() {
     Serial.println("Connecting to WiFi...");
   }
   Serial.println("Connected to WiFi");
+
   Wire.begin();
   imu1.init();
   imu2.init();
-  Serial.println("IMU initialized");
+  Serial.println("IMUs initialized");
 
   imu1.setAccRange(ICM20948_ACC_RANGE_2G);
   imu2.setAccRange(ICM20948_ACC_RANGE_2G);
@@ -139,7 +139,7 @@ void setup() {
   webSocket.begin(WS_SERVER_IP, WS_SERVER_PORT, "/");
   webSocket.onEvent(webSocketEvent);
   webSocket.setReconnectInterval(5000);
-  // Create a FreeRTOS task
+  // Create a FreeRTOS task for sending the knee angle to the server
   xTaskCreatePinnedToCore(
       sendAngle,      // Task function
       "RepeatedTask", // Name

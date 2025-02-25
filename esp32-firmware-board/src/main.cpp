@@ -28,7 +28,7 @@ const int WS_SERVER_PORT = 8765;
 
 // WebSocket client instance
 WebSocketsClient webSocket;
-bool isWebSocketConnected = false; // Track connection status
+bool isWebSocketConnected = false;
 
 void handleWebSocketMessage(uint8_t *payload, size_t length) {
   // Parse JSON message
@@ -57,7 +57,7 @@ void handleWebSocketMessage(uint8_t *payload, size_t length) {
 
 void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
   if (type == WStype_CONNECTED) {
-        // Send unique identifier
+        // Send unique identifier when connected to server
         Serial.println("WebSocket connected!");
         webSocket.sendTXT("BoardESP");
         isWebSocketConnected = true;
@@ -98,13 +98,4 @@ void setup() {
 void loop() {
   // Maintain WebSocket connection
   webSocket.loop();
-
-  /* // Send a message every 5 seconds
-  static unsigned long lastMessageTime = 0;
-  if (isWebSocketConnected && millis() - lastMessageTime > 5000) {
-      lastMessageTime = millis();
-      String message = "Hello from ESP32!";
-      webSocket.sendTXT(message.c_str());
-      Serial.println("Message sent to server: " + message);
-  } */
 }

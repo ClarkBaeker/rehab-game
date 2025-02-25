@@ -1,7 +1,5 @@
-import os
 import pygame
 from screens.screen_interface import ScreenInterface
-from utils.utils import render_text, load_image
 from utils.invisible_button import InvisibleButton
 
 
@@ -39,16 +37,7 @@ class RepeatScreen(ScreenInterface):
 
     def go_forward(self):
         # Reset data for new run if desired
-        self.reset_shared_data()
         self.manager.switch_screen("HOME_SCREEN")
-
-    def reset_shared_data(self):
-        # Clear out old data
-        self.manager.shared_data["dots_pressed"] = 0
-        self.manager.shared_data["start_time"] = None
-        self.manager.shared_data["press_times"] = []
-        self.manager.shared_data["end_reason"] = None
-        self.manager.shared_data["feedback"] = None
 
     def update(self):
         super().update()

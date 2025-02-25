@@ -14,17 +14,15 @@ class TouchDots(GameInterface):
     def __init__(self, manager):
         super().__init__(manager)
         self.level = self.manager.shared_data["level"]
-        print(self.level)
 
         # Define the size of the game screen
         scaler = 50
-        self.game_screen_width = 12 * scaler 
-        self.game_screen_height = 12 * scaler 
+        self.game_screen_width = 12 * scaler
+        self.game_screen_height = 12 * scaler
 
         # Dots are drawn in percent from the center of the screen
-        dist_x = 1/3 # horizontal distance between dots, as ratio 
-        dist_y = 1/4 # vertical distance between dots, as ratio
-    
+        dist_x = 1 / 3  # horizontal distance between dots, as ratio
+        dist_y = 1 / 4  # vertical distance between dots, as ratio
 
         self.dots = [
             {
@@ -115,13 +113,10 @@ class TouchDots(GameInterface):
 
         for c in self.dots:
             c["pos"] = (
-                c["pos"][0] * self.game_screen_width 
-                + self.manager.screen_width / 2,
+                c["pos"][0] * self.game_screen_width + self.manager.screen_width / 2,
                 c["pos"][1] * (self.game_screen_height)
                 + self.manager.screen_height / 2,
             )
-        self.active_dot_id: int = None
-        self.maximum_duration = 5 * 60  # in seconds
 
         if self.manager.shared_data["game_mode"] == "Connect the Dots":
             if self.level == "Level 1":
@@ -143,18 +138,22 @@ class TouchDots(GameInterface):
             if self.level == "Level 3":
                 self.order = [10, 7, 4, 0, 1, 2]
 
+        self.active_dot_id: int = None
+        self.maximum_duration = 5 * 60  # in seconds
         self.how_often_to_press_dots = len(self.order)
-        self.maximum_duration = 3 * 60
         self.current_idx = 0
         self.positive_sound = load_sound("sounds/positive_sound.mp3")
+        self.shared_data = {
+            "dots_pressed": 0,
+            "press_times": [],
+        }  # will store the number of dots pressed with times
+        # Ensure clean start regarding game specific shared data
+        self.rmv_shared_data()
+        self.add_shared_data()
 
     def start(self):
         super().start()
         self.current_idx = 0
-        self.manager.shared_data["dots_pressed"] = (
-            0  # will store the number of dots pressed
-        )
-        self.manager.shared_data["press_times"] = []  # will store (time_stamp, dot_id)
         self._highlight_next()
         self.manager.send_message(
             "KneeESP",
@@ -168,7 +167,7 @@ class TouchDots(GameInterface):
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mx, my = event.pos
                 self.update(mx, my, check_collision=True)
-            else: 
+            else:
                 # Do not check collision, as the mouse is not pressed
                 mx, my = pygame.mouse.get_pos()
                 self.update(mx, my, check_collision=False)
@@ -176,7 +175,7 @@ class TouchDots(GameInterface):
     def update(self, pos_x, pos_y, check_collision=True):
         super().update()
         self.manager.logger.append_position_data(pos_x, pos_y)
-        if check_collision: 
+        if check_collision:
             self._check_dot_collision(pos_x, pos_y)
             self._check_game_end_condition()
 
@@ -219,20 +218,6 @@ class TouchDots(GameInterface):
             {"command": "turn_off"},
         )
 
-    def _highlight_new_dot(self):
-        possible_ids = [
-            c["id"]
-            for c in self.dots
-            if c["id"] != self.active_dot_id
-            # and c["id"] in [0, 1]  # change this back after all leds are connected
-        ]
-        if not possible_ids:
-            return
-        self.active_dot_id = random.choice(possible_ids)
-        self.manager.send_message(
-            "BoardESP", {"command": "turn_on", "led_id": self.active_dot_id}
-        )
-
     def _highlight_next(self):
         if self.current_idx >= len(self.order):
             return
@@ -254,7 +239,6 @@ class TouchDots(GameInterface):
 
                     self.manager.shared_data["dots_pressed"] += 1
                     press_time = time.time()
-                    self.manager.shared_data.setdefault("press_times", [])
                     self.manager.shared_data["press_times"].append(
                         (press_time, self.active_dot_id)
                     )
@@ -268,16 +252,10 @@ class TouchDots(GameInterface):
     def _check_game_end_condition(self):
         if self.manager.shared_data["dots_pressed"] >= self.how_often_to_press_dots:
             self.manager.shared_data["end_reason"] = "win"
-            self.manager.shared_data["duration"] = int(
-                time.time() - self.manager.shared_data["start_time"]
-            )
             self.end_game()
             return
 
         elapsed_time = time.time() - self.manager.shared_data["start_time"]
         if elapsed_time > self.maximum_duration:
             self.manager.shared_data["end_reason"] = "timeout"
-            self.manager.shared_data["duration"] = int(
-                time.time() - self.manager.shared_data["start_time"]
-            )
             self.end_game()
